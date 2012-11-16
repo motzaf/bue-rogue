@@ -1,3 +1,12 @@
 Bü-Rogue README
 
-a rogue like game from Motz
+a rogue-like game from Motz
+
+Bü-Rogue is a play of words with the German word "Büro" ( office ) and rogue
+
+The game is written in python3.
+
+No graphical output other then text mode is planned at the moment.
+
+The game is planned to be single-player at the moment.
+
