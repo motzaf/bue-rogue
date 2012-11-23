@@ -4,9 +4,47 @@ import random
 ##TODO Kommentar
 ### file to list als eigenes modul
 ### 
+### winning condition??
+### losing condition??
+### time/turns
+
+### (c)pickle for writing binarys to file
+
+
+class Room(object):
+        ''' Rooms contain Humans, Furniture and Items '''
+        number = 0
+        ## office
+        ## bathroom (m/f/unisex)
+        ## corridor
+        ## lobby
+        ## street
+        ## public transport
+        ## private car
+        ## copy room
+        ## cafeteria
+
+        def __init__(self):
+            ## first instance of Class Room has to be street (roomnumber 1)
+            ## each level has at least one street, corridor, bathroom and elevator (for reaching next level)
+            ## the other rooms will be randomized
+            ## ppl spawn on street
+            
+            Room.number+=1
+            self.number=Room.number
+            self.maxCapacity=4  #depends on roomtype
+            ### self.quality= from -1 to 1
+            
+
+            
 
 class Mensch(object):
         ''' der standard mitarbeiteter '''
+        ### selfawareness per property
+        ### instant (love/hate) first impression
+        ### interaction between humans
+        ### energylevel for opposing aggression
+                
         nummer = 0 #Klassenattribut gehoert der gesamten Menschheit
         ## Listen als Klassenattribute (spart file-IO)        
         farben=[]
@@ -14,7 +52,7 @@ class Mensch(object):
         vornamenm=[]
         nachnamen=[]
         
-        def __init__(self):
+        def __init__(self,roomnumber=1):
             ''' konstruktoirorr oder so'''
             self.geschlecht=random.choice(['m','w'])
             self.haarfarbe=self.getColor()
@@ -23,6 +61,7 @@ class Mensch(object):
             Mensch.nummer+=1
             self.nummer=Mensch.nummer
             self.name=self.getName()
+            self.roomnumber=roomnumber
                 
         def getName(self):
             if self.geschlecht=='m':
