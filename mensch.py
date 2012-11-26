@@ -22,7 +22,7 @@ class Trait(object):
                 self.intensity=0.0          ### 0.0 to 1.0
                 self.awarenessSelf=0.25     ### 0.0 to 1.0
                 self.awarenessForeign=0.0   ### 0.0 to 1.0
-                self.visabilty=0.1          ### 0.0 to 1.0
+                self.visabilty=0.1          ### 0.0 to 1.0  ##verstellfaktor (kosttet energie)
                 self.approvalSelf=0.0       ### -1.0 to +1.0 for approval rate
                 self.approvalForeign=0.0    ### -1.0 to +1.0 for approval rate
                 if randomTrigger:
@@ -52,8 +52,6 @@ class Trait(object):
                 return text
                         
                         
-                
-
 class Quest(object):
         ''' liek get formular or talk to somebody bout something'''
 
@@ -88,8 +86,6 @@ class Room(object):
             ### self.quality= from -1 to 1
             
 
-            
-
 class Human(object):
         ''' der standard mitarbeiteter '''
         ### selfawareness per property
@@ -121,14 +117,12 @@ class Human(object):
         def export(self):
                 text=''
                 for i in self.__dict__:
-                        text+='{}: {}\n'.format(i,self.__dict__[i])
                         if i[0:5]=='trait':
-                                text+='{}: {}\n'.format(i,self.__dict__[i].export())
+                                text+='{}:\n{}\n'.format(i,self.__dict__[i].export())
+                        else:
+                                text+='{}: {}\n'.format(i,self.__dict__[i])        
                 return text
-
-
-                        
-            
+                                    
         def getName(self):
             if self.sex=='m':
                 vn=random.choice(Human.firstnamesM)
@@ -140,17 +134,15 @@ class Human(object):
         def getColor(self):
             return random.choice(Human.colors)[:-1]
                 
-class Menschheit(object):
-    menschen={}
+#class Menschheit(object):
+#    menschen={}
     ## eine vergleichsmethode zweier zufaelliger menschen
 
 #menschheit=[]
 
-def main():
-
+def loadVariables():
     ## reading files into lists
     ## may use 'for' in future
-    
     file=open('color.txt')
     Human.colors=file.readlines()
     file.close()
@@ -163,7 +155,10 @@ def main():
     file=open('nachname.txt')
     Human.lastnames=file.readlines()
     file.close()
-    
+    return True
+
+def main():
+    loadVariables()
     while True:
         menschling=Human()
         #print(menschling.nummer)
@@ -173,10 +168,6 @@ def main():
         ###print(menschling.__dict__)
         ###menschen export bauen
         print(menschling.export())
-
-
-
-
         eingabe=input()
         if eingabe=="q":
             break
