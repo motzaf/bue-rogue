@@ -47,7 +47,7 @@ class Trait(object):
                 ''' a method for output '''
                 text=''
                 for i in self.__dict__:
-                        text+='{}: {}\n'.format(i,self.__dict__[i])
+                        text+='    {}: {}\n'.format(i,self.__dict__[i]) # the export is idented by 4 spaces
 
                 return text
                         
