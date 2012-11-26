@@ -3,6 +3,7 @@
 
 #for i in range(10):
 #    print('there are {} peas'.format(i))
+#### rework the menusystem and implement autocompletion
 
 import os
 
