@@ -12,6 +12,11 @@ import random
 
 ### nummernautomat.. als npc
 
+#schreibe eine methode der klasse raum, welche ueber alle generic items iteriert deren raumnummer chekct
+#und wenn raummnummere matched die itemnummer in eine liste (attribut von raum) eintraegt
+#mit dieser liste von itemnummern soll eine exportfunktion gemacht werden (text)
+
+
 class Trait(object):
         ''' positve and negative attributes of Humans '''
         number=0
@@ -55,10 +60,34 @@ class Trait(object):
 class Quest(object):
         ''' liek get formular or talk to somebody bout something'''
 
-class Items(object):
-        ''' movable Items like paperclip '''
+class GenItems(object):
+        ''' generic item class '''
+        number = 0
+        def __init__(self):
+            self.number=GenItems.number
+            GenItems.number+=1
+            self.farbe=random.choice(['rot','blau','gruen'])
+            self.eigen=random.choice(['gross','klein','stinkig'])
+        def export(self):
+            text=''
+            text+='{} {}'.format(self.farbe,self.eigen)
+            return text
 
-class Furniture(object):
+class MovableItems(GenItems):
+        ''' movable Items like paperclip '''
+        def __init__(self):
+            GenItems.__init__(self)
+            
+            self.typ=random.choice(['bierdeckl','bzeroklammer','telefon','schlissel'])
+            #print(self.export())
+        def export(self):
+            text=''
+            text+='{} {} {}'.format(self.farbe,self.eigen,self.typ)
+            return text
+
+
+            
+class StaticItems(object):
         ''' unmovable objects '''
 
 class Room(object):
