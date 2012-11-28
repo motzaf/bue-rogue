@@ -66,6 +66,8 @@ class GenItems(object):
         def __init__(self):
             self.number=GenItems.number
             GenItems.number+=1
+            ##roomnumber will be fixxxxed
+            self.roomnumber=random.randomint(0,2)
             self.farbe=random.choice(['rot','blau','gruen'])
             self.eigen=random.choice(['gross','klein','stinkig'])
         def export(self):
@@ -92,7 +94,8 @@ class StaticItems(object):
 
 class Room(object):
         ''' Rooms contain Humans, Furniture and Items '''
-        number = 0
+        number=0
+        roomItems=[]
         ## office
         ## bathroom (m/f/unisex)
         ## corridor
@@ -113,6 +116,18 @@ class Room(object):
             self.number=Room.number
             self.maxCapacity=4  #depends on roomtype
             ### self.quality= from -1 to 1
+            self.genItems(random.randint(1,5))
+            
+        def genItems(self,items=0):
+            '''generate some Items for the Room'''
+            for i in range(0,items):
+                pass
+
+        
+        def checkItems(self):
+                
+            for i in range(0,GenItems.number):
+                if 
             
 
 class Human(object):
