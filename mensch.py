@@ -16,14 +16,21 @@ import random
 #und wenn raummnummere matched die itemnummer in eine liste (attribut von raum) eintraegt
 #mit dieser liste von itemnummern soll eine exportfunktion gemacht werden (text)
 
+class World(object):
+        items={}  ###key=itemnumber, value=instance
+        creatures={}
+        rooms={}
+        traits={}
+        quests={}
 
 class Trait(object):
-        ''' positve and negative attributes of Humans '''
+        ''' positve and negative attributes of Creatures '''
         number=0
         def __init__(self,name='TraitX',randomTrigger=True):
                 self.name=name
-                Trait.number+=1
                 self.number=Trait.number
+                Trait.number+=1
+                World.traits[self.number]=self
                 self.intensity=0.0          ### 0.0 to 1.0
                 self.awarenessSelf=0.25     ### 0.0 to 1.0
                 self.awarenessForeign=0.0   ### 0.0 to 1.0
@@ -59,15 +66,24 @@ class Trait(object):
                         
 class Quest(object):
         ''' liek get formular or talk to somebody bout something'''
-
-class GenItems(object):
-        ''' generic item class '''
         number = 0
         def __init__(self):
-            self.number=GenItems.number
-            GenItems.number+=1
-            ##roomnumber will be fixxxxed
-            self.roomnumber=random.randomint(0,2)
+                self.number=Quest.number
+                Quest.number+=1
+                World.quests[self.number]=self
+
+class GenericItem(object):
+        ''' generic item class '''
+        number = 0
+        
+        def __init__(self,roomnumber=-1):
+            self.number=GenericItem.number
+            GenericItem.number+=1
+            World.items[self.number]=self
+            if roomnumber==-1:                
+                    self.roomnumber=random.randomint(0,2) ###fixme
+            else:
+                    self.roomnumber=roomnumber   
             self.farbe=random.choice(['rot','blau','gruen'])
             self.eigen=random.choice(['gross','klein','stinkig'])
         def export(self):
@@ -75,10 +91,10 @@ class GenItems(object):
             text+='{} {}'.format(self.farbe,self.eigen)
             return text
 
-class MovableItems(GenItems):
+class MovableItem(GenericItem):
         ''' movable Items like paperclip '''
         def __init__(self):
-            GenItems.__init__(self)
+            GenericItem.__init__(self)
             
             self.typ=random.choice(['bierdeckl','bzeroklammer','telefon','schlissel'])
             #print(self.export())
@@ -89,13 +105,12 @@ class MovableItems(GenItems):
 
 
             
-class StaticItems(object):
+class StaticItem(object):
         ''' unmovable objects '''
 
 class Room(object):
-        ''' Rooms contain Humans, Furniture and Items '''
+        ''' Rooms contain Creatures, Furniture and Items '''
         number=0
-        roomItems=[]
         ## office
         ## bathroom (m/f/unisex)
         ## corridor
@@ -110,27 +125,33 @@ class Room(object):
             ## first instance of Class Room has to be street (roomnumber 1)
             ## each level has at least one street, corridor, bathroom and elevator (for reaching next level)
             ## the other rooms will be randomized
-            ## ppl spawn on street
-            
-            Room.number+=1
+            ## ppl spawn on street           
             self.number=Room.number
+            Room.number+=1
+            World.rooms[self.number]=self
             self.maxCapacity=4  #depends on roomtype
             ### self.quality= from -1 to 1
-            self.genItems(random.randint(1,5))
+            for i in range(random.randint(1,5)):
+                    GenericItem(self.number)
+                    #self.itemList.append(self.genItems())            
             
-        def genItems(self,items=0):
-            '''generate some Items for the Room'''
-            for i in range(0,items):
-                pass
-
-        
         def checkItems(self):
-                
-            for i in range(0,GenItems.number):
-                if 
-            
+            itemDict={}    
+            for i in World.items: ## iteriert ueber keys
+                if World.items[i].roomnumber==self.number:
+                        itemDict[i]=World.items[i]
+            return itemDict
 
-class Human(object):
+        def export(self):
+            ''' export room properties to text '''
+            text='Roomnumber: {}\n Items:\n'.format(self.number)
+            tmpDict=self.checkItems()
+            for i in tmpDict:
+                    text+='{}: {}\n'.format(i,tmpDict[i].export())
+            return text
+                
+
+class Creature(object):
         ''' der standard mitarbeiteter '''
         ### selfawareness per property
         ### instant (love/hate) first impression
@@ -146,12 +167,13 @@ class Human(object):
         
         def __init__(self,roomnumber=1):
             ''' konstruktoirorr oder so'''
+            self.number=Creature.number
+            Creature.number+=1
+            World.creatures[self.number]=self
             self.sex=random.choice(['m','w'])
             self.hairColor=self.getColor()
             #self.groesse=random.randint(150,210)
             #self.gewicht=random.randint(50,150)
-            Human.number+=1
-            self.number=Human.number
             self.name=self.getName()
             self.roomnumber=roomnumber
             self.trait1=Trait('Trait1')
@@ -169,14 +191,14 @@ class Human(object):
                                     
         def getName(self):
             if self.sex=='m':
-                vn=random.choice(Human.firstnamesM)
+                vn=random.choice(Creature.firstnamesM)
             else:
-                vn=random.choice(Human.firstnamesF)
-            nn=random.choice(Human.lastnames)
+                vn=random.choice(Creature.firstnamesF)
+            nn=random.choice(Creature.lastnames)
             return vn[:-1]+' '+nn[:-1]
                             
         def getColor(self):
-            return random.choice(Human.colors)[:-1]
+            return random.choice(Creature.colors)[:-1]
                 
 #class Menschheit(object):
 #    menschen={}
@@ -188,23 +210,23 @@ def loadVariables():
     ## reading files into lists
     ## may use 'for' in future
     file=open('color.txt')
-    Human.colors=file.readlines()
+    Creature.colors=file.readlines()
     file.close()
     file=open('vorname.f.txt')
-    Human.firstnamesF=file.readlines()
+    Creature.firstnamesF=file.readlines()
     file.close()
     file=open('vorname.m.txt')
-    Human.firstnamesM=file.readlines()
+    Creature.firstnamesM=file.readlines()
     file.close()
     file=open('nachname.txt')
-    Human.lastnames=file.readlines()
+    Creature.lastnames=file.readlines()
     file.close()
     return True
 
 def main():
     loadVariables()
     while True:
-        menschling=Human()
+        menschling=Creature()
         #print(menschling.nummer)
         #Menschheit.menschen[menschling.number]=menschling
         #menschheit.append(menschling)
