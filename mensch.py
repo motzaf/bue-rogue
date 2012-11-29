@@ -26,8 +26,13 @@ class World(object):
 class Trait(object):
         ''' positve and negative attributes of Creatures '''
         number=0
-        def __init__(self,name='TraitX',randomTrigger=True):
-                self.name=name
+        traitNameList=[]
+        
+        def __init__(self,name='nothing',randomTrigger=True):
+                if name=='nothing':
+                        self.name=random.choice((Trait.traitNameList))
+                else:
+                        self.name=name
                 self.number=Trait.number
                 Trait.number+=1
                 World.traits[self.number]=self
@@ -176,17 +181,28 @@ class Creature(object):
             #self.gewicht=random.randint(50,150)
             self.name=self.getName()
             self.roomnumber=roomnumber
-            self.trait1=Trait('Trait1')
-            self.trait2=Trait('Trait2')
-            self.trait3=Trait('Trait3')
+            self.traits={}
+            for i in range(3,7):
+                    myTrait=Trait()
+                    self.traits[myTrait.name]=myTrait
+                    
+            #self.trait1=Trait('Trait1')
+            #self.trait2=Trait('Trait2')
+            #self.trait3=Trait('Trait3')
 
         def export(self):
                 text=''
                 for i in self.__dict__:
-                        if i[0:5]=='trait':
-                                text+='{}:\n{}\n'.format(i,self.__dict__[i].export())
-                        else:
-                                text+='{}: {}\n'.format(i,self.__dict__[i])        
+                #        if i[0:5]=='trait':
+                #                text+='{}:\n{}\n'.format(i,self.__dict__[i].export())
+                #        else:
+                #                text+='{}: {}\n'.format(i,self.__dict__[i])
+                        if i!='traits':
+                                text+='{}: {}\n'.format(i,self.__dict__[i])
+                text += 'Traits: \n'             
+                for i in self.traits:
+                        text+=self.traits[i].export()
+                        
                 return text
                                     
         def getName(self):
@@ -221,6 +237,10 @@ def loadVariables():
     file=open('nachname.txt')
     Creature.lastnames=file.readlines()
     file.close()
+    file=open('traits.csv')
+    Trait.traitNameList=file.readlines()
+    file.close()
+    Trait.traitNameList.pop(0)### killt ueberschrift
     return True
 
 def main():
