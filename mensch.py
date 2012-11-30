@@ -22,6 +22,8 @@ class World(object):
         rooms={}
         traits={}
         quests={}
+        quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
+        
 
 class Trait(object):
         ''' positve and negative attributes of Creatures '''
@@ -66,6 +68,25 @@ class Trait(object):
                 for i in self.__dict__:
                         text+='    {}: {}\n'.format(i,self.__dict__[i]) # the export is idented by 4 spaces
 
+                return text
+        
+        def exportVerbose(self,sex):
+                ## <he/she> is <quantity traitadj>, which <he/she> is <quantity selfawareness>
+                ### which is <quantity visibility> for the world
+                ### <he/she> <selfapproval quantity> and <foreignapproval quantity>
+                ### <he/she> can detect <trait> in others with <quantity foreignawareness>
+                text=''
+                quant=self.intensity ##### is 0.35 oder so
+                sortKeys=World.quantityWords.keys()
+                
+                for k in sorted(sortKeys,reverse=True):
+                        #print(k,quant)
+                        if k < quant:
+                                break
+                word=World.quantityWords[k]
+                
+                text+='{} is {} {}'.format(sex[1],word,self.name)
+                
                 return text
                         
                         
@@ -175,7 +196,8 @@ class Creature(object):
             self.number=Creature.number
             Creature.number+=1
             World.creatures[self.number]=self
-            self.sex=random.choice(['m','w'])
+            self.sex=random.choice(['m','f'])
+            self.age=random.randint(20,80)
             self.hairColor=self.getColor()
             #self.groesse=random.randint(150,210)
             #self.gewicht=random.randint(50,150)
@@ -204,6 +226,25 @@ class Creature(object):
                         text+=self.traits[i].export()
                         
                 return text
+
+        def exportVerbose(self):
+            ### <name> is a <haicolor> haired, <age> year old <sex>
+            text=''
+            if self.sex=='m':
+                    ######0######1####2######
+                    sex=['man','he','him']
+            else:
+                    sex=['woman','she','her']
+
+            text+='{} is a {} haired, {} year old {}\n'.format(self.getName(),self.hairColor,self.age,sex[0])
+
+            for i in self.traits:
+                    text+=self.traits[i].exportVerbose(sex)
+            
+            return text
+
+
+            
                                     
         def getName(self):
             if self.sex=='m':
@@ -253,7 +294,8 @@ def main():
 
         ###print(menschling.__dict__)
         ###menschen export bauen
-        print(menschling.export())
+        #print(menschling.export())
+        print(menschling.exportVerbose())
         eingabe=input()
         if eingabe=="q":
             break
