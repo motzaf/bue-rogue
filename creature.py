@@ -18,5 +18,5 @@ class Human(Creature):
     ''' humanoid '''
 
     def __init__(self):
-        self.__creatureCounter__()
-        self.sex=random.choice(['m','f'])
+        Creature.__init__(self)
+        self.name='text'

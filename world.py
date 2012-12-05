@@ -31,9 +31,3 @@ class World(object):
             if f[:-4] in World.__dict__.keys():
                 print(f)
                 World.__dict__[f[:-4]].extend(lines)
-               
-        #file=open('color.txt')
-        #self.colors=file.readlines()
-        #file.close()
-
-    #self.loadFiles()

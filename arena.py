@@ -20,8 +20,10 @@ def checkSympath(human1, human2):
     #print(human1.trait1.approvalSelf+'  '+human2.trait1.approvalSelf)
     return text
 
+### interaktionen in zeit
+#### z.b name rausgeben kurz, wegfragen, hinweisen, ausborgen
 
-def battle(h1, h2):
+def battle(h1, h2, textSwitch=True):
     text=''
     #text+=h1.exportVerbose()
     word=''
@@ -39,18 +41,19 @@ def battle(h1, h2):
                 word='ignores'
             text+='Approval: {} {} {} for being {} \n'.format(h1.name, word, h2.name, i)
             result=h1.traits[i].approvalForeign*h2.traits[i].intensity
-            text+='Result: {} = appr{} * intens{}\n'.format(result,h1.traits[i].approvalForeign,h2.traits[i].intensity)
-            text+='{} loses energy: {}\n'.format(h1.name,result)
+            text+='Result: {} = appr {} * intens {}\n'.format(round(result,2),round(h1.traits[i].approvalForeign,2),round(h2.traits[i].intensity,2))
+            text+='{} loses energy: {}\n'.format(h1.name,round(result,2))
             energy1+=result
         #if energy1 != 0.0:
-            text+='* TotalEnergy: {}\n'.format(energy1)
+            text+='* TotalEnergy: {}\n'.format(round(energy1,2))
 
-            
-        
         
     #    print(h1[i])
     text+='...............................'
-    return text
+    if textSwitch:
+        return text
+    else:
+        return energy1
 
     
 def main():
