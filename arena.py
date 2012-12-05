@@ -71,6 +71,8 @@ def main():
         x=input()
         if x == 'q':
             break
+
+    
     
 ### wenn manuell ausgefuehrt wird main() funktion ausgefuehrt
 ### wenn als modul importiert, dann wird main() nicht ausgefuehrt
