@@ -1,0 +1,11 @@
+red
+blue
+white
+yellow
+violet
+lack
+gray
+green
+darkgreen
+darkblue
+amber

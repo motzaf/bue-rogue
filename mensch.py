@@ -242,9 +242,6 @@ class Creature(object):
                     text+=self.traits[i].exportVerbose(sex)
             
             return text
-
-
-            
                                     
         def getName(self):
             if self.sex=='m':
