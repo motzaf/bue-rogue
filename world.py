@@ -1,3 +1,5 @@
+import os
+
 class World(object):
     ''' contains dictionary and lists containing instances '''
 
@@ -16,19 +18,22 @@ class World(object):
     lastnames=[]
     traitnames=[]
 
-
     #Filelist
-    files=['data/colornames.txt','data/firstnamesf.txt','data/firstnamesm.txt','data/lastnames.txt','data/traitnames.csv']
-
-
+    filenames=['colornames.txt','firstnamesf.txt','firstnamesm.txt','lastnames.txt','traitnames.csv']
     
-    def loadFiles(self,files=[]):
-        for file in files:
-            print(file)
+    def loadFiles(self,filenames=[]):
+        lines=[]
+        for f in filenames:
+            fo=open(os.path.join('data',f))
+            lines=fo.readlines()
+            fo.close()
 
+            if f[:-4] in World.__dict__.keys():
+                print(f)
+                World.__dict__[f[:-4]].extend(lines)
+               
         #file=open('color.txt')
         #self.colors=file.readlines()
         #file.close()
 
     #self.loadFiles()
-
