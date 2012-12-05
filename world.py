@@ -20,10 +20,14 @@ class World(object):
 
     #Filelist
     filenames=['colornames.txt','firstnamesf.txt','firstnamesm.txt','lastnames.txt','traitnames.csv']
+
     
     def loadFiles(self,filenames=[]):
+        ''' loads all files into dictionaries and lists '''
+
+        print('Loading Files:')
         lines=[]
-        for f in filenames:
+        for f in World.filenames:
             fo=open(os.path.join('data',f))
             lines=fo.readlines()
             fo.close()
@@ -31,3 +35,4 @@ class World(object):
             if f[:-4] in World.__dict__.keys():
                 print(f)
                 World.__dict__[f[:-4]].extend(lines)
+        print('done')

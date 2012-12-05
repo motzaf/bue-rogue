@@ -8,6 +8,19 @@ class Creature(object):
     def __init__(self, roomnumber=1):
         self.__creatureCounter__()
         self.sex=random.choice(['m','f'])
+        
+        #General Attibutes
+        self.intelligence=0.0
+        self.vitality=0.0
+        self.charisma=0.0
+        self.emphathy=0.0
+        self.thirst=0.0
+        self.hunger=0.0
+        
+        self.memory=[]
+        self.flaw=[]
+        self.trait=[]
+        self.skills=[]
 
     def __creatureCounter__(self):
         self.number=Creature.number
@@ -19,4 +32,22 @@ class Human(Creature):
 
     def __init__(self):
         Creature.__init__(self)
-        self.name='text'
+        self.name=self.createName()        
+
+    def createName(self):
+        if self.sex=='m':
+            fn=random.choice(world.World.firstnamesm)
+        else:
+            fn=random.choice(world.World.firstnamesf)
+        ln=random.choice(world.World.lastnames)
+        return fn[:-1]+' '+ln[:-1]
+
+    def export(self):
+        text='--------------------\n'
+        text+='Name: {} \nSex: '.format(self.name)
+        if self.sex=='m':
+            text+='Male'
+        else:
+            text+='Female'
+        text+='\n--------------------\n'
+        return text
