@@ -16,7 +16,7 @@ def main():
         menuscreen.addstr(12,0,h.export())
         q=menuscreen.getch()
         
-        if q==113:
+        if q==ord('q'):
             break
         
     curses.endwin()

@@ -6,7 +6,10 @@ class Creature(object):
     number = 0
     
     def __init__(self, roomnumber=1):
-        self.__creatureCounter__()
+        self.number=Creature.number
+        Creature.number+=1
+        world.World.creatures[self.number]=self    ##put instance in world dictionary    
+    
         self.sex=random.choice(['m','f'])
         
         #General Attibutes
@@ -22,11 +25,7 @@ class Creature(object):
         self.trait=[]
         self.skills=[]
 
-    def __creatureCounter__(self):
-        self.number=Creature.number
-        Creature.number+=1
-        world.World.creatures[self.number]=self    ##put instance in world dictionary    
-    
+        
 class Human(Creature):
     ''' humanoid '''
 
