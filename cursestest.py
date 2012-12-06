@@ -59,7 +59,7 @@ def printtext():
 
 def main(stdscr):
     global screen
-    screen = stdscr.subwin(23, 79, 0, 0)
+    screen = stdscr.subwin(23, 79, 0, 0)	## VT100 80x24
     screen.box()
     screen.addstr(0,2,'menu')
     #screen.addstr('asdf')

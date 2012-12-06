@@ -1,0 +1,8 @@
+rot
+blau
+weiss
+blond
+braun
+schwarz
+grau
+grün
