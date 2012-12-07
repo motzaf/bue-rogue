@@ -3,7 +3,7 @@ import curses
 import curses.textpad
 import traceback
 #import tmp.mensch
-from tmp import mensch
+#from tmp import mensch
 
 
 def printmenu():
@@ -13,7 +13,6 @@ def printmenu():
 def printtext():
     text='asdf\nasfd\nasfd'
     return text
-
 
 
 #def main():
@@ -63,7 +62,7 @@ def printtext():
 
 
 def main(stdscr):
-    mensch.loadVariables()
+    #mensch.loadVariables()
     ## global screen ### macht variblen global
     screen = stdscr.subwin(23, 79, 0, 0)	## VT100 80x24
     screen.box()
@@ -78,9 +77,9 @@ def main(stdscr):
             screen.addstr('sdfsfsdfsdfsdf\n\nnnnnnnnnnnnnn')
         elif key==ord('q'):
             break
-        elif key==ord('c'):
-            c=mensch.Creature()
-            screen.addstr(c.export())
+        #elif key==ord('c'):
+        #    c=mensch.Creature()
+        #    screen.addstr(c.export())
     screen.refresh()
     #stdscr.refresh()
 

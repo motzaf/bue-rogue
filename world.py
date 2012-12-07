@@ -6,6 +6,7 @@ class World(object):
     #Dictionaries
     creatures={}
     rooms={}
+    levels={}
     items={}
     quests={}
     quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
