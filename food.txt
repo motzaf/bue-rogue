@@ -1,4 +1,0 @@
-coffee
-donut
-milk
-schnitzel

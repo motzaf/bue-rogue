@@ -2,6 +2,9 @@
 import curses
 import curses.textpad
 import traceback
+#import tmp.mensch
+from tmp import mensch
+
 
 def printmenu():
     text='Welcome'
@@ -10,6 +13,8 @@ def printmenu():
 def printtext():
     text='asdf\nasfd\nasfd'
     return text
+
+
 
 #def main():
 ##    menuScr=curses.initscr()
@@ -58,7 +63,8 @@ def printtext():
 
 
 def main(stdscr):
-    global screen
+    mensch.loadVariables()
+    ## global screen ### macht variblen global
     screen = stdscr.subwin(23, 79, 0, 0)	## VT100 80x24
     screen.box()
     screen.addstr(0,2,'menu')
@@ -67,10 +73,16 @@ def main(stdscr):
     #screen.addstr(2,2,'asdf')
     #curses.textpad.rectangle(stdscr,4,4,15,15)
     while True:
-        if screen.getch():
+        key=screen.getch()
+        if key==ord('p'):
+            screen.addstr('sdfsfsdfsdfsdf\n\nnnnnnnnnnnnnn')
+        elif key==ord('q'):
             break
+        elif key==ord('c'):
+            c=mensch.Creature()
+            screen.addstr(c.export())
     screen.refresh()
-    stdscr.refresh()
+    #stdscr.refresh()
 
 if __name__=='__main__':
     try:
@@ -91,3 +103,5 @@ if __name__=='__main__':
         curses.nocbreak()
         curses.endwin()
         traceback.print_exc()
+    finally:    #durchlesen und checken
+        pass
