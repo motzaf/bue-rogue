@@ -23,6 +23,8 @@ def printtext():
     return text
 
 def main(mainScreen):
+    ###lets instance a world
+    w=world.World()
     #menuscr.addstr(2,3,printmenu())
     #menuScr.hline(3,3,'*',10)
     #statusscr=curses.newwin(15,15,5,20)
@@ -43,7 +45,8 @@ def main(mainScreen):
     roomScreen.refresh()
 
     ###loading Files
-    world.World.loadFiles(world.World.filenames)    
+    status=w.loadFiles(w.filenames)
+    #mainScreen.addstr(status)
 
     while True:
         key=mainScreen.getch()

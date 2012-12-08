@@ -25,8 +25,7 @@ class World(object):
     
     def loadFiles(self,filenames=[]):
         ''' loads all files into dictionaries and lists '''
-
-        print('Loading Files:')
+        text='Loading Files:'
         lines=[]
         for f in World.filenames:
             fo=open(os.path.join('data',f))
@@ -34,6 +33,7 @@ class World(object):
             fo.close()
 
             if f[:-4] in World.__dict__.keys():
-                print(f)
+                text+=f
                 World.__dict__[f[:-4]].extend(lines)
-        print('done')
+        text+='done'
+        return text

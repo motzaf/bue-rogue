@@ -27,7 +27,7 @@ class Level(object):
 
             if world.World.rooms[r].level == self.number:
                 text+=world.World.rooms[r].export()
-        text+='\n***********+\n'
+        text+='\n************+\n'
         return text
 
 
@@ -35,7 +35,7 @@ class Level(object):
 class Room(object):
     number=0
     roomTypes=['lobby','corridor','infirmary','office','waitingroom']
-    def __init__(self,level):
+    def __init__(self,level,isLobby=True):
         self.level=level
         self.number=Room.number
         Room.number+=1
@@ -49,4 +49,8 @@ class Room(object):
         text='\nRoomnumber: {} \n'.format(self.number)
         return text
     
+
+    def generate(self):
+        text=''
+        return text
     
