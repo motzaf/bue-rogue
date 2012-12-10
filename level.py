@@ -70,11 +70,7 @@ class Room(object):
     def export(self):
         text='\nRoomnumber: {} \n'.format(self.number)
         return text
-    
-    def generate(self):
-        text=''
-        return text
-    
+       
 class Door(object):
     number=0
 
