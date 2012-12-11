@@ -65,18 +65,21 @@ def generate_menu_items(tmp_list):
     
     return item_list    #integer for keyprocessing
 
-def main(mainScreen):
+def main(main_screen):
     ###lets instance a world
     w=world.World()
-    
-    mainScreen.refresh()
-    exportScreen=curses.newwin(6,80,17,0)
-    exportScreen.refresh()
+
+    ##instance some screens
+    main_screen.refresh()
+    export_screen=curses.newwin(6,80,17,0)
+    export_screen.refresh()
+    export_screen.idlok(1)    ###for scrolling
+    export_screen.scrollok(1)
 
     ###loading Files
     status=w.loadFiles(w.filenames)
-    exportScreen.addstr(' \n [s] to start\n [q] to quit ')
-    exportScreen.refresh()
+    export_screen.addstr(' \n [s] to start\n [q] to quit ')
+    export_screen.refresh()
 
     #generating level
     l=level.Level()
@@ -86,15 +89,20 @@ def main(mainScreen):
     room=(world.World.rooms[0])
     
     while True:
-        key=mainScreen.getch()
+        key=main_screen.getch()
+        t=1
         
         if key==ord('q'):
             break
+        if key==ord('t'):
+            t+=1
+            export_screen.addstr('asdfasfdasfd{}\n'.format(t))
         if key==ord('s'):
             
             while True:
+                #main_screen.clear()
                 door_dict=draw_room(room)
-                key=mainScreen.getch()
+                key=main_screen.getch()
                 if key==ord('q'):
                     break
                 if key in door_dict.keys():
@@ -106,8 +114,8 @@ def main(mainScreen):
                     
                     
 
-        mainScreen.refresh()
-        exportScreen.refresh()
+        main_screen.refresh()
+        export_screen.refresh()
 
 
 if __name__=='__main__':
