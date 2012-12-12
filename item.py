@@ -7,10 +7,12 @@ class Item(object):
     nom=['bleistift','zeichenblock','kugelschreiber','bürogueklammer','tischlampe','blumentopf']
     number=0
 
-    def __init__(self):
+    def __init__(self,roomnumber=-1):
+        self.roomnumber=roomnumber
         self.number=Item.number
         Item.number+=1
         world.World.items[self.number]=self
+        self.name=self.name_generator()
 
     def name_generator(self,name=''):
         if name=='':

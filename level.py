@@ -33,8 +33,6 @@ class Level(object):
         #for r in sorted(world.World.rooms):
         #    if world.World.rooms[r].level == self.number:
                 
-            
-            
 
     def export(self):
         text='\nLevel: {}\n'.format(self.number)
@@ -47,7 +45,7 @@ class Level(object):
 
 class Room(object):
     number=0
-    roomTypes=['lobby','corridor','infirmary','office','waitingroom']
+    roomTypes=['corridor','infirmary','office','waitingroom']
     def __init__(self,level,isLobby=True):
         self.level=level
         self.number=Room.number

@@ -34,11 +34,9 @@ def draw_room(room):
     #drawing static doors
     #door_screen=curses.newwin(3,3,1,20)
     #door_screen.box()
-    #
-    #
     #drawing label in center
     label_screen=curses.newwin(3,20,8,15)
-    label_screen.addstr(room.export())
+    #label_screen.addstr(room.export())
     label_screen.refresh()
     ##drawing the doors
     ## 'a' = 97
@@ -60,9 +58,7 @@ def printmenu():
     text='Welcome'
     return text
 
-def generate_menu_items(tmp_list):
-    
-    
+def generate_menu_items(tmp_list):    
     return item_list    #integer for keyprocessing
 
 def main(main_screen):
@@ -102,6 +98,8 @@ def main(main_screen):
             while True:
                 #main_screen.clear()
                 door_dict=draw_room(room)
+                export_screen.addstr('{} \n'.format(room.export()))
+                export_screen.refresh()
                 key=main_screen.getch()
                 if key==ord('q'):
                     break
@@ -111,12 +109,11 @@ def main(main_screen):
                         if i!=room.number:
                             room=world.World.rooms[i]
                             break
-                    
-                    
+                main_screen.erase()
+                main_screen.refresh()                    
 
         main_screen.refresh()
         export_screen.refresh()
-
 
 if __name__=='__main__':
     try:
