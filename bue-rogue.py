@@ -245,13 +245,29 @@ class Item(object):
 
 class Menu(object):
     def __init__(self):
-        menuItems=[]
-        
-    def menuItem(self):
         pass
 
-def mainMenu():
-    pass
+def main_menu():
+    screen=curses.newwin(10,5,5,30)
+    screen.keypad(1)
+    menu_items=['play','test','quit']
+    #screen.addstr('asdf',curses.color_pair(1))
+    item=0
+    for m in menu_items:
+        screen.addstr(menu_items.index(m),0,m)
+    screen.addstr(item,0,menu_items[item],curses.color_pair(1))
+    while True:
+        key=screen.getch()
+        if key==258:  ###key_up
+            item+=1
+            screen.addstr(item,0,menu_items[item],curses.color_pair(1))
+            
+        if key==ord('q'):
+            break
+        
+    #m=Menu()
+    #for item in menu_items:
+    #return 's'
 
 def draw_room(room):
     ''' drawing rooms and doors '''
@@ -292,10 +308,6 @@ def draw_room(room):
         
     return door_dict
 
-def printmenu():
-    text='Welcome'
-    return text
-
 def generate_menu_items(tmp_list):    
     return item_list    #integer for keyprocessing
 
@@ -323,8 +335,9 @@ def main(main_screen):
     room=(World.rooms[0])
     
     while True:
-        key=main_screen.getch()
+        main_menu()
         
+        key=main_screen.getch()
         if key==ord('q'):
             break
 
@@ -356,6 +369,8 @@ if __name__=='__main__':
         curses.noecho()
         curses.cbreak()
         curses.curs_set(0)
+        curses.start_color()
+        curses.init_pair(1,curses.COLOR_BLACK,curses.COLOR_WHITE)
         ############
         main(mainscr)
         ############
