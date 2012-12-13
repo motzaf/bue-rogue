@@ -3,7 +3,7 @@ import world
 
 class Item(object):
     ###epic liste von eigenschaftsworten gewisse wschl. bez. eigenschaft
-    adj=['org','ur','leiwand','viech','voi','fett']
+    adj=['org','ur','episch','leiwand','viech','voi','fett']
     nom=['bleistift','zeichenblock','kugelschreiber','bürogueklammer','tischlampe','blumentopf']
     number=0
 

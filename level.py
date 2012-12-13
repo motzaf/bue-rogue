@@ -5,10 +5,35 @@ class Level(object):
     number=0
     #self.rooms=[]
     #### other options ueber alle raeume iterieren und schaun welches level ihm gehoert
-    def __init__(self,minRooms=3,maxRooms=9):
+    def __init__(self):
         self.number=Level.number
         Level.number+=1
         world.World.levels[self.number]=self
+        self.generate_rooms(3,9)
+
+    def generate_rooms(self,minRooms=3,maxRooms=9):
+        corridor_nr=-1
+        bathroom_nr=-1
+        lobby_nr=-1
+
+        for r in range(0,random.randint(minRooms,maxRooms+1)):
+            if lobby_nr==-1:
+                tmp_room=Room(self.number,'lobby')
+                lobby_nr=tmp_room.number
+            elif corridor_nr==-1:
+                tmp_room=Room(self.number,'corridor')
+                corridor_nr=tmp_room.number
+                Door(self.number,lobby_nr,corridor_nr)
+            elif bathroom_nr==-1:
+                tmp_room=Room(self.number,'bathroom')
+                bathroom_nr=tmp_room.number
+                Door(self.number,bathroom_nr,random.choice((corridor_nr,lobby_nr)))
+            else:
+                tmp_room=Room(self.number)
+                Door(self.number,tmp_room.number,corridor_nr) 
+        
+    def room_gen_tmp(self):
+        #### alte raumgen methode
         tmpCorridorNumber=-1
         tmpBathroomNumber=-1
         tmpLobbyNumber=-1
@@ -30,9 +55,6 @@ class Level(object):
             else:
                 Door(self.number,tmpCorridorNumber,tmpRoom.number)                
 
-        #for r in sorted(world.World.rooms):
-        #    if world.World.rooms[r].level == self.number:
-                
 
     def export(self):
         text='\nLevel: {}\n'.format(self.number)
@@ -45,16 +67,20 @@ class Level(object):
 
 class Room(object):
     number=0
-    roomTypes=['corridor','infirmary','office','waitingroom']
-    def __init__(self,level,isLobby=True):
+    roomTypes=['corridor','infirmary','office','waitingroom','bathroom','lobby']
+    def __init__(self,level,roomtype=''):
         self.level=level
         self.number=Room.number
         Room.number+=1
         world.World.rooms[self.number]=self
-        self.roomtype=random.choice(Room.roomTypes)
-        self.lobby=False
-        self.bathroom=False
-        self.corridor=False
+        if roomtype=='':
+            self.roomtype=random.choice(Room.roomTypes)
+        else:
+            self.roomtype=roomtype
+            
+        #self.lobby=False
+        #self.bathroom=False
+        #self.corridor=False
         #self.doors=[]
 
     def check_doors(self):
@@ -66,7 +92,8 @@ class Room(object):
         return doorlist
 
     def export(self):
-        text='\nRoomnumber: {} \n'.format(self.number)
+        text='\nRoomnumber: {} {}\n'.format(self.number,self.roomtype)
+        text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
         return text
        
 class Door(object):
