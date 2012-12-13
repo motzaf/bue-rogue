@@ -29,7 +29,7 @@ class World(object):
     filenames=['colornames.txt','firstnamesf.txt','firstnamesm.txt','lastnames.txt','traitnames.csv']
 
     
-    def loadFiles(self,filenames=[]):
+    def load_files(self,filenames=[]):
         ''' loads all files into dictionaries and lists '''
         text='Loading Files:'
         lines=[]
@@ -73,9 +73,9 @@ class Human(Creature):
 
     def __init__(self):
         Creature.__init__(self)
-        self.name=self.createName()        
+        self.name=self.create_name()        
 
-    def createName(self):
+    def create_name(self):
         if self.sex=='m':
             fn=random.choice(World.firstnamesm)
         else:
@@ -94,16 +94,39 @@ class Human(Creature):
         return text
 
 class Level(object):
-    number=0
+    counter=0
     #self.rooms=[]
     #### other options ueber alle raeume iterieren und schaun welches level ihm gehoert
     def __init__(self):
-        self.number=Level.number
-        Level.number+=1
+        self.is_lobby=True
+        self.number=Level.counter
+        Level.counter+=1
         self.lobby_nr=-1
         self.corridor_nr=-1
         World.levels[self.number]=self
-        self.generate_rooms(3,9)
+        #self.generate_rooms(3,9)
+        self.generate_rooms2()
+
+        self.bathroom_counter=random.randint(1,3)
+        self.corridor_counter=random.randint(3,6)
+	
+
+    def generate_rooms2(self,connect_room_to=0):
+        for i in range(3,7):
+            if self.is_lobby:
+                room=Room(self.number,'lobby')
+                self.is_lobby=False
+                room=Room(self.number,'corridor')
+                #corridor_counter-=1
+                Door(self.number,room.number,connect_room_to)
+                connect_room_to=room.number
+
+            else:
+                room=Room(self.number,random.choice(Room.roomtypes))
+                Door(self.number,room.number,connect_room_to)
+                if room.roomtype=='corridor':
+                    self.generate_rooms2(room.number) 
+
 
     def generate_rooms(self,minRooms=3,maxRooms=9):
         bathroom_nr=-1
@@ -140,12 +163,12 @@ class Level(object):
         return text
 
 class Room(object):
-    number=0
-    roomtypes=['corridor','infirmary','office','waitingroom','bathroom']
+    counter=0
+    roomtypes=['corridor','storeroom','office','bathroom','cantina']
     def __init__(self,level,roomtype=''):
         self.level=level
-        self.number=Room.number
-        Room.number+=1
+        self.number=Room.counter
+        Room.counter+=1
         World.rooms[self.number]=self
         if roomtype=='':
             self.roomtype=random.choice(Room.roomtypes)
@@ -288,7 +311,7 @@ def main(main_screen):
     export_screen.scrollok(1)
 
     ###loading Files
-    status=w.loadFiles(w.filenames)
+    status=w.load_files(w.filenames)
     export_screen.addstr(' \n [s] to start\n [q] to quit ')
     export_screen.refresh()
 
@@ -301,13 +324,10 @@ def main(main_screen):
     
     while True:
         key=main_screen.getch()
-        t=1
         
         if key==ord('q'):
             break
-        if key==ord('t'):
-            t+=1
-            export_screen.addstr('asdfasfdasfd{}\n'.format(t))
+
         if key==ord('s'):
             
             while True:
