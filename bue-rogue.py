@@ -103,13 +103,16 @@ class Level(object):
         Level.counter+=1
         self.lobby_nr=-1
         self.corridor_nr=-1
+        self.corridors = 0     # number of corridors in this level
+        self.maxcorridors = 25 # avoid stack overvlow with recursive function
         World.levels[self.number]=self
-        #self.generate_rooms(3,9)
-        self.generate_rooms2()
-
-        self.bathroom_counter=random.randint(1,3)
-        self.corridor_counter=random.randint(3,6)
-	
+        self.generate_rooms(self.lobby_nr, 3,9)
+        #self.generate_rooms2() # motz funktionsaufruf
+        
+        
+        #self.bathroom_counter=random.randint(1,3)
+        #self.corridor_counter=random.randint(3,6)
+    
 
     def generate_rooms2(self,connect_room_to=0):
         for i in range(3,7):
@@ -128,29 +131,23 @@ class Level(object):
                     self.generate_rooms2(room.number) 
 
 
-    def generate_rooms(self,minRooms=3,maxRooms=9):
-        bathroom_nr=-1
-        corridor_nr=-1
-
-        for r in range(0,random.randint(minRooms,maxRooms+1)):
-            if self.lobby_nr==-1:
+    def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
+        """recursive function to generate an start room (can be the lobby)
+           and some other rooms connected to this startroom"""
+        
+        for r in range(0,random.randint(minRooms,maxRooms+1)): 
+            if startroomnumber==-1:
+                #  
                 tmp_room=Room(self.number,'lobby')
-                self.lobby_nr=tmp_room.number
-            elif corridor_nr==-1:
-                tmp_room=Room(self.number,'corridor')
-                self.corridor_nr=tmp_room.number
-                Door(self.number,self.lobby_nr,self.corridor_nr)
-            elif bathroom_nr==-1:
-                tmp_room=Room(self.number,'bathroom')
-                bathroom_nr=tmp_room.number
-                Door(self.number,bathroom_nr,random.choice((self.corridor_nr,self.lobby_nr)))
+                self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
+                startroomnumber = tmp_room.number  # set the startroomnumber
             else:
-                roomtype=random.choice(Room.roomtypes)
-                tmp_room=Room(self.number,roomtype)
-                Door(self.number,tmp_room.number,self.corridor_nr)
-                if roomtype=='corridor':
-                    self.corridor_nr=tmp_room.number
-                    self.generate_rooms(2,4)
+                tmp_room = Room(self.number)                      #create non-lobby-room
+                Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
+                if tmp_room.roomtype == 'corridor':
+                    self.corridors += 1            # increase level-wide corridorcounter
+                    if self.corridors < self.maxcorridors:        #avoid stack-overvlow
+                        self.generate_rooms(tmp_room.number)      # recursion
                 
 
     def export(self):
