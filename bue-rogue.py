@@ -250,20 +250,44 @@ class Menu(object):
 def main_menu():
     screen=curses.newwin(10,5,5,30)
     screen.keypad(1)
-    menu_items=['play','test','quit']
+    menu_items=[('play','s'),('test','t'),('quit','q')]
     #screen.addstr('asdf',curses.color_pair(1))
-    item=0
+    counter=0
     for m in menu_items:
-        screen.addstr(menu_items.index(m),0,m)
-    screen.addstr(item,0,menu_items[item],curses.color_pair(1))
+        screen.addstr(menu_items.index(m),0,m[0])
+    screen.addstr(0,0,menu_items[0][0],curses.color_pair(2))
     while True:
         key=screen.getch()
-        if key==258:  ###key_up
-            item+=1
-            screen.addstr(item,0,menu_items[item],curses.color_pair(1))
-            
+        #if key==258 and item < len(menu_items)-1:  ###key_down
+        #    item+=1
+        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
+        #    screen.addstr(item-1,0,menu_items[item-1])
+        #if key==259 and item > 0:  ###key_up
+        #    item-=1
+        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
+        #    screen.addstr(item+1,0,menu_items[item+1])
+
+        if key==258:
+            pos_old=counter%len(menu_items)
+            counter+=1
+            pos=counter%len(menu_items)
+            screen.addstr(pos,0,menu_items[pos][0],curses.color_pair(2))
+            screen.addstr(pos_old,0,menu_items[pos_old][0])
+
+        if key==259:
+            pos_old=counter%len(menu_items)
+            counter-=1
+            pos=counter%len(menu_items)
+            screen.addstr(pos,0,menu_items[pos][0],curses.color_pair(2))
+            screen.addstr(pos_old,0,menu_items[pos_old][0])
+
+        if key in (curses.KEY_ENTER, curses.KEY_RIGHT, curses.KEY_LEFT):
+            screen.erase()
+            return ord(menu_items[pos][1])
+
         if key==ord('q'):
-            break
+            screen.erase()
+            return ord('q')
         
     #m=Menu()
     #for item in menu_items:
@@ -324,7 +348,7 @@ def main(main_screen):
 
     ###loading Files
     status=w.load_files(w.filenames)
-    export_screen.addstr(' \n [s] to start\n [q] to quit ')
+    #export_screen.addstr(' \n [s] to start\n [q] to quit ')
     export_screen.refresh()
 
     #generating level
@@ -335,9 +359,9 @@ def main(main_screen):
     room=(World.rooms[0])
     
     while True:
-        main_menu()
+        key=main_menu()
         
-        key=main_screen.getch()
+        #key=main_screen.getch()
         if key==ord('q'):
             break
 
@@ -371,6 +395,7 @@ if __name__=='__main__':
         curses.curs_set(0)
         curses.start_color()
         curses.init_pair(1,curses.COLOR_BLACK,curses.COLOR_WHITE)
+        curses.init_pair(2,curses.COLOR_YELLOW,curses.COLOR_BLUE)
         ############
         main(mainscr)
         ############
