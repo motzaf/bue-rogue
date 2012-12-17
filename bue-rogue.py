@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import traceback
 import curses
 import random
@@ -15,8 +14,8 @@ class World(object):
     doors={}
     items={}
     quests={}
-    quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
-    approvalWords={-0.7:'hates',0.0:'ignores',0.7:'loves'}
+    #quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
+    #approvalWords={-0.7:'hates',0.0:'ignores',0.7:'loves'}
 
     #Lists
     colornames=[]
@@ -142,7 +141,8 @@ class Level(object):
                 self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
                 startroomnumber = tmp_room.number  # set the startroomnumber
             else:
-                tmp_room = Room(self.number)                      #create non-lobby-room
+                tmp_room = Room(self.number)        #create non-lobby-room
+                tmp_room.x_backdoor=r
                 Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
                 if tmp_room.roomtype == 'corridor':
                     self.corridors += 1            # increase level-wide corridorcounter
@@ -166,6 +166,7 @@ class Room(object):
         self.level=level
         self.number=Room.counter
         Room.counter+=1
+        x_backdoor=-1
         World.rooms[self.number]=self
         if roomtype=='':
             self.roomtype=random.choice(Room.roomtypes)
@@ -177,11 +178,12 @@ class Room(object):
         #self.corridor=False
         #self.doors=[]
 
-    def check_doors(self):
+    def check_doors(self,tupel_index=0):
+        '''gibt obere oder untere tueren zurueck, tupel_index=0 fuer unten 1 fuer oben'''
         doorlist=[]
         for d in World.doors:
             if World.doors[d].level == self.level:
-                if self.number in World.doors[d].door_tupel:
+                if self.number in World.doors[d].door_tupel[tupel_index]:
                     doorlist.append(World.doors[d].number)        
         return doorlist
 
@@ -192,7 +194,6 @@ class Room(object):
        
 class Door(object):
     number=0
-
     def __init__(self,level,room1nr,room2nr):
         self.level=level
         self.number=Door.number
@@ -280,6 +281,7 @@ def main_menu():
 
         if key in (curses.KEY_ENTER, curses.KEY_RIGHT, curses.KEY_LEFT):
             screen.erase()
+            pos=counter%len(menu_items)
             return ord(menu_items[pos][1])
 
         if key==ord('q'):
@@ -290,11 +292,56 @@ def main_menu():
     #for item in menu_items:
     #return 's'
 
+def draw_room2(room):
+    #room variables
+    room_height=15
+    room_width=40
+    room_pos_h=2
+    room_pos_v=2
+    #door variables #### roemischen sind da drin
+    door_pos_h=5
+    door_pos_v=1 # oder 17
+    #drawing room
+    room_screen=curses.newwin(room_height,room_width,room_pos_v,room_pos_h)
+    room_screen.box()
+    room_screen.refresh()
+    
+    
+    door_dict={}
+    key=97
+    for w in [0,1]:
+        door_list=room.check_doors(w)
+        for d in door_list:
+            ##writing the dict
+            door_dict[key]=d        
+            ##the drawing stuff
+            if w==0:
+                ##unten
+                door_pos_v=17
+                for r World.rooms:
+                    # suche jenen Raum, dessen Raumnummer die 2. Raumnummer der aktuellen türe ist(doortuple)
+                    #nimm von diesem Raumdie  xbackdoor koordinate
+                    
+            else:
+                door_pos_v=1
+                
+
+            door_screen=curses.newwin(3,3,1,door_pos_h)
+            door_screen.box()
+            door_pos_h+=4
+            door_screen.addstr(1,1,chr(key))
+            key+=1
+            door_screen.refresh()
+        
+    return door_dict
+
+
 def draw_room(room):
     ''' drawing rooms and doors '''
     door_dict={}    ##will be returned
     #print(room.check_doors())
     door_list=room.check_doors()
+    
     #room variables
     room_height=15
     room_width=40
