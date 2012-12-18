@@ -191,7 +191,19 @@ class Room(object):
         text='\nRoomnumber: {} {}\n'.format(self.number,self.roomtype)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
         return text
-       
+
+class Office(Room):
+    def __init__(self):
+        Room.__init__(self)    
+
+class Lobby(Room):
+    def __init__(self):
+        Room.__init__(self)    
+          
+class Corridor(Room):
+    def __init__(self):
+        Room.__init__(self)    
+
 class Door(object):
     number=0
     def __init__(self,level,room1nr,room2nr):
