@@ -183,7 +183,7 @@ class Room(object):
         doorlist=[]
         for d in World.doors:
             if World.doors[d].level == self.level:
-                if self.number in World.doors[d].door_tupel[tupel_index]:
+                if self.number == World.doors[d].door_tupel[tupel_index]:
                     doorlist.append(World.doors[d].number)        
         return doorlist
 
@@ -299,36 +299,37 @@ def draw_room2(room):
     room_pos_h=2
     room_pos_v=2
     #door variables #### roemischen sind da drin
-    door_pos_h=5
-    door_pos_v=1 # oder 17
+    #door_pos_h=5
+    #door_pos_v=1 # oder 17
     #drawing room
     room_screen=curses.newwin(room_height,room_width,room_pos_v,room_pos_h)
     room_screen.box()
     room_screen.refresh()
     
-    
     door_dict={}
     key=97
     for w in [0,1]:
+    #for w in [0]:
         door_list=room.check_doors(w)
-        for d in door_list:
+        print("doorlist,w",door_list,w)
+        for d in door_list: # türnummern
             ##writing the dict
             door_dict[key]=d        
             ##the drawing stuff
-            if w==0:
-                ##unten
-                door_pos_v=17
-                for r World.rooms:
-                    # suche jenen Raum, dessen Raumnummer die 2. Raumnummer der aktuellen türe ist(doortuple)
-                    #nimm von diesem Raumdie  xbackdoor koordinate
-                    
-            else:
+            if w==0: 
                 door_pos_v=1
+            else:
+                door_pos_v=15
                 
-
-            door_screen=curses.newwin(3,3,1,door_pos_h)
+            up_room_number=World.doors[d].door_tupel[1]    
+            for r in World.rooms:
+                # suche jenen Raum, dessen Raumnummer die 2. Raumnummer der aktuellen türe ist(doortuple)
+                #nimm von diesem Raumdie  xbackdoor koordinate
+                if World.rooms[r].number==up_room_number:
+                    door_pos_h=World.rooms[r].x_backdoor
+                    break
+            door_screen=curses.newwin(3,3,door_pos_v,door_pos_h*3+3)
             door_screen.box()
-            door_pos_h+=4
             door_screen.addstr(1,1,chr(key))
             key+=1
             door_screen.refresh()
@@ -413,7 +414,7 @@ def main(main_screen):
             
             while True:
                 #main_screen.clear()
-                door_dict=draw_room(room)
+                door_dict=draw_room2(room)
                 export_screen.addstr('{} \n'.format(room.export()))
                 export_screen.refresh()
                 key=main_screen.getch()
