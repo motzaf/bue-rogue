@@ -47,10 +47,11 @@ class Creature(object):
     ''' default creature '''
     number = 0
     
-    def __init__(self, roomnumber=1):
+    def __init__(self, roomnumber=0):
         self.number=Creature.number
         Creature.number+=1
         World.creatures[self.number]=self    ##put instance in world dictionary    
+        self.roomnumber=roomnumber
     
         self.sex=random.choice(['m','f'])
         
@@ -70,8 +71,8 @@ class Creature(object):
 class Human(Creature):
     ''' humanoid '''
 
-    def __init__(self):
-        Creature.__init__(self)
+    def __init__(self,roomnumber=0):
+        Creature.__init__(self,roomnumber=0)
         self.name=self.create_name()        
 
     def create_name(self):
@@ -83,13 +84,12 @@ class Human(Creature):
         return fn[:-1]+' '+ln[:-1]
 
     def export(self):
-        text='--------------------\n'
+        text='\n'
         text+='Name: {} \nSex: '.format(self.name)
         if self.sex=='m':
             text+='Male'
         else:
             text+='Female'
-        text+='\n--------------------\n'
         return text
 
 class Level(object):
@@ -104,6 +104,8 @@ class Level(object):
         self.corridor_nr=-1
         self.corridors = 0     # number of corridors in this level
         self.maxcorridors = 25 # avoid stack overvlow with recursive function
+        self.maxrooms=4
+        self.rooms=0
         World.levels[self.number]=self
         self.generate_rooms(self.lobby_nr, 3,9)
         #self.generate_rooms2() # motz funktionsaufruf
@@ -111,9 +113,42 @@ class Level(object):
         
         #self.bathroom_counter=random.randint(1,3)
         #self.corridor_counter=random.randint(3,6)
-    
+ 
+    def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
+        """recursive function to generate an start room (can be the lobby)
+           and some other rooms connected to this startroom"""
+        
+        for r in range(0,random.randint(minRooms,maxRooms+1)): 
+            if self.maxrooms<self.rooms:
+                break
+            if startroomnumber==-1:
+                #tmp_room=Room(self.number,'lobby')
+                tmp_room=Lobby(self.number)
+                #self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
+                startroomnumber = tmp_room.number  # set the startroomnumber
+            else:
+                rt=random.choice(Room.roomtypes)       ##create non-lobby room
+                #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
+                ######getattr####WE MISS YOU!!!!!#########
+                if rt=='Corridor':
+                    tmp_room=Corridor(self.number)
+                    #tmp_room.x_backdoor=r
+                    #Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
+                elif rt=='Office':
+                    tmp_room=Office(self.number)
+                elif rt=='Cantina':
+                    tmp_room=Cantina(self.number)
+                elif rt=='Storage':
+                    tmp_room=Storage(self.number)
+                tmp_room.x_backdoor=r
+                Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
 
-    def generate_rooms2(self,connect_room_to=0):
+                if rt=='Corridor':
+                    if self.corridors < self.maxcorridors:        #avoid stack-overvlow
+                        self.generate_rooms(tmp_room.number)      # recursion
+        
+
+    def motz_generate_rooms2(self,connect_room_to=0):
         for i in range(3,7):
             if self.is_lobby:
                 room=Room(self.number,'lobby')
@@ -129,27 +164,6 @@ class Level(object):
                 if room.roomtype=='corridor':
                     self.generate_rooms2(room.number) 
 
-
-    def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
-        """recursive function to generate an start room (can be the lobby)
-           and some other rooms connected to this startroom"""
-        
-        for r in range(0,random.randint(minRooms,maxRooms+1)): 
-            if startroomnumber==-1:
-                #  
-                tmp_room=Room(self.number,'lobby')
-                self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
-                startroomnumber = tmp_room.number  # set the startroomnumber
-            else:
-                tmp_room = Room(self.number)        #create non-lobby-room
-                tmp_room.x_backdoor=r
-                Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
-                if tmp_room.roomtype == 'corridor':
-                    self.corridors += 1            # increase level-wide corridorcounter
-                    if self.corridors < self.maxcorridors:        #avoid stack-overvlow
-                        self.generate_rooms(tmp_room.number)      # recursion
-                
-
     def export(self):
         text='\nLevel: {}\n'.format(self.number)
         for r in World.rooms:
@@ -161,22 +175,30 @@ class Level(object):
 
 class Room(object):
     counter=0
-    roomtypes=['corridor','storeroom','office','bathroom','cantina']
-    def __init__(self,level,roomtype=''):
+    roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
+    def __init__(self,level):
         self.level=level
         self.number=Room.counter
-        Room.counter+=1
+        Room.counter+=1 ### sind alle ids
+        World.levels[self.level].rooms+=1 ###zaehl wieviele raeume ein level hat
         x_backdoor=-1
         World.rooms[self.number]=self
-        if roomtype=='':
-            self.roomtype=random.choice(Room.roomtypes)
-        else:
-            self.roomtype=roomtype
-            
+        #if roomtype=='':
+        #    self.roomtype=random.choice(Room.roomtypes)
+        #else:
+        #    self.roomtype=roomtype
         #self.lobby=False
         #self.bathroom=False
         #self.corridor=False
         #self.doors=[]
+
+    def check_creatures(self):
+        '''number of creatures in this room'''
+        count=0
+        for c in World.creatures:
+            if World.creatures[c].roomnumber==self.number:
+                count+=1
+        return count
 
     def check_doors(self,tupel_index=0):
         '''gibt obere oder untere tueren zurueck, tupel_index=0 fuer unten 1 fuer oben'''
@@ -188,21 +210,37 @@ class Room(object):
         return doorlist
 
     def export(self):
-        text='\nRoomnumber: {} {}\n'.format(self.number,self.roomtype)
+        roomname=repr(self)
+        roomname=roomname.split(".")[1].split(' ')[0]
+        text='\nRoomnumber: {} {}\n'.format(self.number,roomname)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
+        text+='Number of Creatures: {} \n'.format(self.check_creatures())
         return text
 
 class Office(Room):
-    def __init__(self):
-        Room.__init__(self)    
+    def __init__(self,level):
+        Room.__init__(self,level)
 
 class Lobby(Room):
-    def __init__(self):
-        Room.__init__(self)    
+    def __init__(self,level):
+        Room.__init__(self,level)    
+        World.levels[self.level].lobby_nr=self.number # set the level-wide lobby-nr
+        for r in range(2,random.randint(2,4)):
+            Human(self.number)
           
 class Corridor(Room):
-    def __init__(self):
-        Room.__init__(self)    
+    def __init__(self,level):
+        Room.__init__(self,level)    
+        World.levels[self.level].corridors+=1   # increase level-wide corridorcounter
+        #self.corridors += 1            
+
+class Storage(Room):
+    def __init__(self,level):
+        Room.__init__(self,level)    
+
+class Cantina(Room):
+    def __init__(self,level):
+        Room.__init__(self,level)    
 
 class Door(object):
     number=0
@@ -323,7 +361,7 @@ def draw_room2(room):
     for w in [0,1]:
     #for w in [0]:
         door_list=room.check_doors(w)
-        print("doorlist,w",door_list,w)
+        #print("doorlist,w",door_list,w)
         for d in door_list: # türnummern
             ##writing the dict
             door_dict[key]=d        
@@ -421,6 +459,10 @@ def main(main_screen):
         #key=main_screen.getch()
         if key==ord('q'):
             break
+
+        if key==ord('t'):
+            h=Human()
+            export_screen.addstr(h.export())
 
         if key==ord('s'):
             
