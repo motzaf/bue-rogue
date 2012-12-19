@@ -145,7 +145,7 @@ class Level(object):
                 rt=random.choice(roomtypeslist)       ##create non-lobby room
                 #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
                 ######getattr####WE MISS YOU!!!!!#########
-                tmp_room = vars()[rt]() # the same as Bad()
+                tmp_room = vars()[rt]() # the same as Cantina() if rt == "Cantina"
                 
                 #if rt=='Corridor':
                 #    tmp_room=Corridor(self.number)
@@ -192,7 +192,7 @@ class Level(object):
 
 class Room(object):
     counter=0
-    roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
+    #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
     def __init__(self,level):
         self.level=level
         self.number=Room.counter
