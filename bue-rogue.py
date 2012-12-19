@@ -113,11 +113,25 @@ class Level(object):
         
         #self.bathroom_counter=random.randint(1,3)
         #self.corridor_counter=random.randint(3,6)
+    def get_roomtypelist(self):
+        """browses all subclasses of Room and returns
+        a list with the class names.
+        Assumes that first char of a classname is correctly uppercase."""
+        roomtypeslist = []
+        for classname in [thing for thing in dir() if thing[0].isupper() ]:
+            for basename in vars()[classname].__bases__:
+                 if ".Room" in str(b):  # the current class is based on Room class
+                     roomtypeslist.append(classname)
+        return roomtypeslist
+
  
     def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
         """recursive function to generate an start room (can be the lobby)
            and some other rooms connected to this startroom"""
-        
+        roomtypeslist = self.get_roomtypelist()
+        if "Lobby" in roomtypeslist:
+            roomtypeslist.remove("Lobby") # remove Lobby
+            
         for r in range(0,random.randint(minRooms,maxRooms+1)): 
             if self.maxrooms<self.rooms:
                 break
@@ -127,19 +141,22 @@ class Level(object):
                 #self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
                 startroomnumber = tmp_room.number  # set the startroomnumber
             else:
-                rt=random.choice(Room.roomtypes)       ##create non-lobby room
+                #rt=random.choice(Room.roomtypes)       ##create non-lobby room
+                rt=random.choice(roomtypeslist)       ##create non-lobby room
                 #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
                 ######getattr####WE MISS YOU!!!!!#########
-                if rt=='Corridor':
-                    tmp_room=Corridor(self.number)
+                tmp_room = vars()[rt]() # the same as Cantina() if rt == "Cantina"
+                
+                #if rt=='Corridor':
+                #    tmp_room=Corridor(self.number)
                     #tmp_room.x_backdoor=r
                     #Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
-                elif rt=='Office':
-                    tmp_room=Office(self.number)
-                elif rt=='Cantina':
-                    tmp_room=Cantina(self.number)
-                elif rt=='Storage':
-                    tmp_room=Storage(self.number)
+                #elif rt=='Office':
+                #    tmp_room=Office(self.number)
+                #elif rt=='Cantina':
+                #    tmp_room=Cantina(self.number)
+                #elif rt=='Storage':
+                #    tmp_room=Storage(self.number)
                 tmp_room.x_backdoor=r
                 Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
 
@@ -175,7 +192,7 @@ class Level(object):
 
 class Room(object):
     counter=0
-    roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
+    #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
     def __init__(self,level):
         self.level=level
         self.number=Room.counter
@@ -210,8 +227,9 @@ class Room(object):
         return doorlist
 
     def export(self):
-        roomname=repr(self)
-        roomname=roomname.split(".")[1].split(' ')[0]
+        #roomname=repr(self)                           # very ugly code from Horst
+        #roomname=roomname.split(".")[1].split(' ')[0] # very ugly code from Horst
+        roomname = self.__class__.__name__             # found at Stackoverflow
         text='\nRoomnumber: {} {}\n'.format(self.number,roomname)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
         text+='Number of Creatures: {} \n'.format(self.check_creatures())
