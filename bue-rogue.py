@@ -210,8 +210,9 @@ class Room(object):
         return doorlist
 
     def export(self):
-        roomname=repr(self)
-        roomname=roomname.split(".")[1].split(' ')[0]
+        #roomname=repr(self)                           # very ugly code from Horst
+        #roomname=roomname.split(".")[1].split(' ')[0] # very ugly code from Horst
+        roomname = self.__class__.__name__             # found at Stackoverflow
         text='\nRoomnumber: {} {}\n'.format(self.number,roomname)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
         text+='Number of Creatures: {} \n'.format(self.check_creatures())
