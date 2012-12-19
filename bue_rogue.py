@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import traceback
 import curses
 import random
@@ -14,8 +15,8 @@ class World(object):
     doors={}
     items={}
     quests={}
-    #quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
-    #approvalWords={-0.7:'hates',0.0:'ignores',0.7:'loves'}
+    quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
+    approvalWords={-0.7:'hates',0.0:'ignores',0.7:'loves'}
 
     #Lists
     colornames=[]
@@ -23,6 +24,8 @@ class World(object):
     firstnamesm=[]
     lastnames=[]
     traitnames=[]
+    itemnames=['pencil','paper','scissors','picture','poster','pot']
+    furniturenames=['desk','terminal','reception']
 
     #Filelist
     filenames=['colornames.txt','firstnamesf.txt','firstnamesm.txt','lastnames.txt','traitnames.csv']
@@ -47,11 +50,10 @@ class Creature(object):
     ''' default creature '''
     number = 0
     
-    def __init__(self, roomnumber=0):
+    def __init__(self, roomnumber=1):
         self.number=Creature.number
         Creature.number+=1
         World.creatures[self.number]=self    ##put instance in world dictionary    
-        self.roomnumber=roomnumber
     
         self.sex=random.choice(['m','f'])
         
@@ -71,8 +73,8 @@ class Creature(object):
 class Human(Creature):
     ''' humanoid '''
 
-    def __init__(self,roomnumber=0):
-        Creature.__init__(self,roomnumber=0)
+    def __init__(self):
+        Creature.__init__(self)
         self.name=self.create_name()        
 
     def create_name(self):
@@ -84,12 +86,13 @@ class Human(Creature):
         return fn[:-1]+' '+ln[:-1]
 
     def export(self):
-        text='\n'
+        text='--------------------\n'
         text+='Name: {} \nSex: '.format(self.name)
         if self.sex=='m':
             text+='Male'
         else:
             text+='Female'
+        text+='\n--------------------\n'
         return text
 
 class Level(object):
@@ -102,53 +105,18 @@ class Level(object):
         Level.counter+=1
         self.lobby_nr=-1
         self.corridor_nr=-1
-        self.corridors = 0     # number of corridors in this level
-        self.maxcorridors = 25 # avoid stack overvlow with recursive function
-        self.maxrooms=4
-        self.rooms=0
         World.levels[self.number]=self
-        self.generate_rooms(self.lobby_nr, 3,9)
-        #self.generate_rooms2() # motz funktionsaufruf
-        
-        
-        #self.bathroom_counter=random.randint(1,3)
-        #self.corridor_counter=random.randint(3,6)
- 
-    def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
-        """recursive function to generate an start room (can be the lobby)
-           and some other rooms connected to this startroom"""
-        
-        for r in range(0,random.randint(minRooms,maxRooms+1)): 
-            if self.maxrooms<self.rooms:
-                break
-            if startroomnumber==-1:
-                #tmp_room=Room(self.number,'lobby')
-                tmp_room=Lobby(self.number)
-                #self.lobby_nr=tmp_room.number      # set the level-wide lobby-nr
-                startroomnumber = tmp_room.number  # set the startroomnumber
-            else:
-                rt=random.choice(Room.roomtypes)       ##create non-lobby room
-                #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
-                ######getattr####WE MISS YOU!!!!!#########
-                if rt=='Corridor':
-                    tmp_room=Corridor(self.number)
-                    #tmp_room.x_backdoor=r
-                    #Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
-                elif rt=='Office':
-                    tmp_room=Office(self.number)
-                elif rt=='Cantina':
-                    tmp_room=Cantina(self.number)
-                elif rt=='Storage':
-                    tmp_room=Storage(self.number)
-                tmp_room.x_backdoor=r
-                Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
+        #self.generate_rooms(3,9)
+        self.generate_rooms2()
 
-                if rt=='Corridor':
-                    if self.corridors < self.maxcorridors:        #avoid stack-overvlow
-                        self.generate_rooms(tmp_room.number)      # recursion
-        
+        self.bathroom_counter=random.randint(1,3)
+        self.corridor_counter=random.randint(3,6)
+    
+    def gen_static(self):
+        Room(self.number,'lobby')
+        Room(self.number,'office')
 
-    def motz_generate_rooms2(self,connect_room_to=0):
+    def generate_rooms2(self,connect_room_to=0):
         for i in range(3,7):
             if self.is_lobby:
                 room=Room(self.number,'lobby')
@@ -162,7 +130,32 @@ class Level(object):
                 room=Room(self.number,random.choice(Room.roomtypes))
                 Door(self.number,room.number,connect_room_to)
                 if room.roomtype=='corridor':
-                    self.generate_rooms2(room.number) 
+                    self.generate_rooms(room.number) 
+
+    def generate_rooms(self,minRooms=3,maxRooms=9):
+        bathroom_nr=-1
+        corridor_nr=-1
+
+        for r in range(0,random.randint(minRooms,maxRooms+1)):
+            if self.lobby_nr==-1:
+                tmp_room=Room(self.number,'lobby')
+                self.lobby_nr=tmp_room.number
+            elif corridor_nr==-1:
+                tmp_room=Room(self.number,'corridor')
+                self.corridor_nr=tmp_room.number
+                Door(self.number,self.lobby_nr,self.corridor_nr)
+            elif bathroom_nr==-1:
+                tmp_room=Room(self.number,'bathroom')
+                bathroom_nr=tmp_room.number
+                Door(self.number,bathroom_nr,random.choice((self.corridor_nr,self.lobby_nr)))
+            else:
+                roomtype=random.choice(Room.roomtypes)
+                tmp_room=Room(self.number,roomtype)
+                Door(self.number,tmp_room.number,self.corridor_nr)
+                if roomtype=='corridor':
+                    self.corridor_nr=tmp_room.number
+                    self.generate_rooms(2,4)
+                
 
     def export(self):
         text='\nLevel: {}\n'.format(self.number)
@@ -175,76 +168,38 @@ class Level(object):
 
 class Room(object):
     counter=0
-    roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
-    def __init__(self,level):
+    roomtypes=['corridor','storeroom','office','bathroom','cantina']
+    def __init__(self,level,roomtype=''):
         self.level=level
         self.number=Room.counter
-        Room.counter+=1 ### sind alle ids
-        World.levels[self.level].rooms+=1 ###zaehl wieviele raeume ein level hat
-        x_backdoor=-1
+        Room.counter+=1
         World.rooms[self.number]=self
-        #if roomtype=='':
-        #    self.roomtype=random.choice(Room.roomtypes)
-        #else:
-        #    self.roomtype=roomtype
+        if roomtype=='':
+            self.roomtype=random.choice(Room.roomtypes)
+        else:
+            self.roomtype=roomtype
+            
         #self.lobby=False
         #self.bathroom=False
         #self.corridor=False
         #self.doors=[]
 
-    def check_creatures(self):
-        '''number of creatures in this room'''
-        count=0
-        for c in World.creatures:
-            if World.creatures[c].roomnumber==self.number:
-                count+=1
-        return count
-
-    def check_doors(self,tupel_index=0):
-        '''gibt obere oder untere tueren zurueck, tupel_index=0 fuer unten 1 fuer oben'''
+    def check_doors(self):
         doorlist=[]
         for d in World.doors:
             if World.doors[d].level == self.level:
-                if self.number == World.doors[d].door_tupel[tupel_index]:
+                if self.number in World.doors[d].door_tupel:
                     doorlist.append(World.doors[d].number)        
         return doorlist
 
     def export(self):
-        #roomname=repr(self)                           # very ugly code from Horst
-        #roomname=roomname.split(".")[1].split(' ')[0] # very ugly code from Horst
-        roomname = self.__class__.__name__             # found at Stackoverflow
-        text='\nRoomnumber: {} {}\n'.format(self.number,roomname)
+        text='\nRoomnumber: {} {}\n'.format(self.number,self.roomtype)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
-        text+='Number of Creatures: {} \n'.format(self.check_creatures())
         return text
-
-class Office(Room):
-    def __init__(self,level):
-        Room.__init__(self,level)
-
-class Lobby(Room):
-    def __init__(self,level):
-        Room.__init__(self,level)    
-        World.levels[self.level].lobby_nr=self.number # set the level-wide lobby-nr
-        for r in range(2,random.randint(2,4)):
-            Human(self.number)
-          
-class Corridor(Room):
-    def __init__(self,level):
-        Room.__init__(self,level)    
-        World.levels[self.level].corridors+=1   # increase level-wide corridorcounter
-        #self.corridors += 1            
-
-class Storage(Room):
-    def __init__(self,level):
-        Room.__init__(self,level)    
-
-class Cantina(Room):
-    def __init__(self,level):
-        Room.__init__(self,level)    
-
+       
 class Door(object):
     number=0
+
     def __init__(self,level,room1nr,room2nr):
         self.level=level
         self.number=Door.number
@@ -294,106 +249,19 @@ class Item(object):
 
 class Menu(object):
     def __init__(self):
+        menuItems=[]
+        
+    def menuItem(self):
         pass
 
-def main_menu():
-    screen=curses.newwin(10,5,5,30)
-    screen.keypad(1)
-    menu_items=[('play','s'),('test','t'),('quit','q')]
-    #screen.addstr('asdf',curses.color_pair(1))
-    counter=0
-    for m in menu_items:
-        screen.addstr(menu_items.index(m),0,m[0])
-    screen.addstr(0,0,menu_items[0][0],curses.color_pair(2))
-    while True:
-        key=screen.getch()
-        #if key==258 and item < len(menu_items)-1:  ###key_down
-        #    item+=1
-        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
-        #    screen.addstr(item-1,0,menu_items[item-1])
-        #if key==259 and item > 0:  ###key_up
-        #    item-=1
-        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
-        #    screen.addstr(item+1,0,menu_items[item+1])
-
-        if key==258:
-            pos_old=counter%len(menu_items)
-            counter+=1
-            pos=counter%len(menu_items)
-            screen.addstr(pos,0,menu_items[pos][0],curses.color_pair(2))
-            screen.addstr(pos_old,0,menu_items[pos_old][0])
-
-        if key==259:
-            pos_old=counter%len(menu_items)
-            counter-=1
-            pos=counter%len(menu_items)
-            screen.addstr(pos,0,menu_items[pos][0],curses.color_pair(2))
-            screen.addstr(pos_old,0,menu_items[pos_old][0])
-
-        if key in (curses.KEY_ENTER, curses.KEY_RIGHT, curses.KEY_LEFT):
-            screen.erase()
-            pos=counter%len(menu_items)
-            return ord(menu_items[pos][1])
-
-        if key==ord('q'):
-            screen.erase()
-            return ord('q')
-        
-    #m=Menu()
-    #for item in menu_items:
-    #return 's'
-
-def draw_room2(room):
-    #room variables
-    room_height=15
-    room_width=40
-    room_pos_h=2
-    room_pos_v=2
-    #door variables #### roemischen sind da drin
-    #door_pos_h=5
-    #door_pos_v=1 # oder 17
-    #drawing room
-    room_screen=curses.newwin(room_height,room_width,room_pos_v,room_pos_h)
-    room_screen.box()
-    room_screen.refresh()
-    
-    door_dict={}
-    key=97
-    for w in [0,1]:
-    #for w in [0]:
-        door_list=room.check_doors(w)
-        #print("doorlist,w",door_list,w)
-        for d in door_list: # türnummern
-            ##writing the dict
-            door_dict[key]=d        
-            ##the drawing stuff
-            if w==0: 
-                door_pos_v=1
-            else:
-                door_pos_v=15
-                
-            up_room_number=World.doors[d].door_tupel[1]    
-            for r in World.rooms:
-                # suche jenen Raum, dessen Raumnummer die 2. Raumnummer der aktuellen türe ist(doortuple)
-                #nimm von diesem Raumdie  xbackdoor koordinate
-                if World.rooms[r].number==up_room_number:
-                    door_pos_h=World.rooms[r].x_backdoor
-                    break
-            door_screen=curses.newwin(3,3,door_pos_v,door_pos_h*3+3)
-            door_screen.box()
-            door_screen.addstr(1,1,chr(key))
-            key+=1
-            door_screen.refresh()
-        
-    return door_dict
-
+def mainMenu():
+    pass
 
 def draw_room(room):
     ''' drawing rooms and doors '''
     door_dict={}    ##will be returned
     #print(room.check_doors())
     door_list=room.check_doors()
-    
     #room variables
     room_height=15
     room_width=40
@@ -428,6 +296,10 @@ def draw_room(room):
         
     return door_dict
 
+def printmenu():
+    text='Welcome'
+    return text
+
 def generate_menu_items(tmp_list):    
     return item_list    #integer for keyprocessing
 
@@ -444,7 +316,7 @@ def main(main_screen):
 
     ###loading Files
     status=w.load_files(w.filenames)
-    #export_screen.addstr(' \n [s] to start\n [q] to quit ')
+    export_screen.addstr(' \n [s] to start\n [q] to quit ')
     export_screen.refresh()
 
     #generating level
@@ -455,21 +327,19 @@ def main(main_screen):
     room=(World.rooms[0])
     
     while True:
-        key=main_menu()
+        key=main_screen.getch()
+        t=1
         
-        #key=main_screen.getch()
         if key==ord('q'):
             break
-
         if key==ord('t'):
-            h=Human()
-            export_screen.addstr(h.export())
-
+            t+=1
+            export_screen.addstr('asdfasfdasfd{}\n'.format(t))
         if key==ord('s'):
             
             while True:
                 #main_screen.clear()
-                door_dict=draw_room2(room)
+                door_dict=draw_room(room)
                 export_screen.addstr('{} \n'.format(room.export()))
                 export_screen.refresh()
                 key=main_screen.getch()
@@ -493,9 +363,6 @@ if __name__=='__main__':
         curses.noecho()
         curses.cbreak()
         curses.curs_set(0)
-        curses.start_color()
-        curses.init_pair(1,curses.COLOR_BLACK,curses.COLOR_WHITE)
-        curses.init_pair(2,curses.COLOR_YELLOW,curses.COLOR_BLUE)
         ############
         main(mainscr)
         ############
