@@ -67,6 +67,7 @@ class Creature(object):
         self.flaw=[]
         self.trait=[]
         self.skills=[]
+
         
 class Human(Creature):
     ''' humanoid '''
@@ -84,7 +85,7 @@ class Human(Creature):
         return fn[:-1]+' '+ln[:-1]
 
     def export(self):
-        text='\n'
+        text=''
         text+='Name: {} \nSex: '.format(self.name)
         if self.sex=='m':
             text+='Male'
@@ -107,7 +108,9 @@ class Level(object):
         self.maxrooms=4
         self.rooms=0
         World.levels[self.number]=self
-        self.generate_rooms(self.lobby_nr, 3,9)
+        self.safe_lobby()
+        
+        #self.generate_rooms(self.lobby_nr, 3,9)
         #self.generate_rooms2() # motz funktionsaufruf
         
         
@@ -124,6 +127,9 @@ class Level(object):
                      roomtypeslist.append(classname)
         return roomtypeslist
 
+    def safe_lobby(self):
+        '''safe and static to test other features'''
+        Lobby(self.number)
  
     def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
         """recursive function to generate an start room (can be the lobby)
@@ -143,14 +149,16 @@ class Level(object):
             else:
                 #rt=random.choice(Room.roomtypes)       ##create non-lobby room
                 rt=random.choice(roomtypeslist)       ##create non-lobby room
-                #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
+                #roomtypes=['Corridor','Office','Cantina','Storage'] 
+                ###lobby fehlt absichtlich
                 ######getattr####WE MISS YOU!!!!!#########
                 tmp_room = vars()[rt]() # the same as Cantina() if rt == "Cantina"
                 
                 #if rt=='Corridor':
                 #    tmp_room=Corridor(self.number)
                     #tmp_room.x_backdoor=r
-                    #Door(self.number,startroomnumber,tmp_room.number) #create door to start rooom
+                    #create door to start rooom
+                    #Door(self.number,startroomnumber,tmp_room.number) 
                 #elif rt=='Office':
                 #    tmp_room=Office(self.number)
                 #elif rt=='Cantina':
@@ -171,7 +179,6 @@ class Level(object):
                 room=Room(self.number,'lobby')
                 self.is_lobby=False
                 room=Room(self.number,'corridor')
-                #corridor_counter-=1
                 Door(self.number,room.number,connect_room_to)
                 connect_room_to=room.number
 
@@ -209,6 +216,22 @@ class Room(object):
         #self.corridor=False
         #self.doors=[]
 
+    def creature_name_list(self):
+        creature_name_list=[]
+        for c in World.creatures:
+            if World.creatures[c].roomnumber==self.number:
+                creature_name_list.append(World.creatures[c].name)
+        return creature_name_list
+
+    def creature_list(self):
+        creature_list=[]
+        for c in World.creatures:
+            if World.creatures[c].roomnumber==self.number:
+                creature_list.append(World.creatures[c])
+        return creature_list
+        
+
+
     def check_creatures(self):
         '''number of creatures in this room'''
         count=0
@@ -243,7 +266,7 @@ class Lobby(Room):
     def __init__(self,level):
         Room.__init__(self,level)    
         World.levels[self.level].lobby_nr=self.number # set the level-wide lobby-nr
-        for r in range(2,random.randint(2,4)):
+        for r in range(0,random.randint(10,20)):
             Human(self.number)
           
 class Corridor(Room):
@@ -311,12 +334,47 @@ class Item(object):
 
 class Menu(object):
     def __init__(self):
-        pass
+        self.screen=curses.newwin(24,50,0,0)
+        self.export=curses.newwin(20,30,0,30)
+        self.screen.keypad(1)
+        self.up_keys=(259,ord('k'))
+        self.down_keys=(258,ord('j'))
+
+    def run(self,menu_items):
+        counter=0
+        for m in menu_items:
+            self.screen.addstr(menu_items.index(m),0,m.name)
+        while True:
+            pos=counter%len(menu_items)
+            self.screen.addstr(pos,0,menu_items[pos].name,curses.color_pair(3))
+            self.export.addstr(0,0,menu_items[pos].export())
+            #self.export.box()
+            self.export.refresh()
+            key=self.screen.getch()
+            self.export.erase()
+            if key in self.down_keys:
+                pos_old=counter%len(menu_items)
+                counter+=1
+                pos=counter%len(menu_items)
+                self.screen.addstr(pos,0,menu_items[pos].name,curses.color_pair(3))
+                self.screen.addstr(pos_old,0,menu_items[pos_old].name)
+
+            if key in self.up_keys:
+                pos_old=counter%len(menu_items)
+                counter-=1
+                pos=counter%len(menu_items)
+                self.screen.addstr(pos,0,menu_items[pos].name,curses.color_pair(3))
+                self.screen.addstr(pos_old,0,menu_items[pos_old].name)
+
+            if key==ord('q'):
+                self.screen.erase()
+                break
+
 
 def main_menu():
     screen=curses.newwin(10,5,5,30)
     screen.keypad(1)
-    menu_items=[('play','s'),('test','t'),('quit','q')]
+    menu_items=[('play','s'),('test','t'),('reset','r'),('quit','q')]
     #screen.addstr('asdf',curses.color_pair(1))
     counter=0
     for m in menu_items:
@@ -391,7 +449,8 @@ def draw_room2(room):
                 
             up_room_number=World.doors[d].door_tupel[1]    
             for r in World.rooms:
-                # suche jenen Raum, dessen Raumnummer die 2. Raumnummer der aktuellen türe ist(doortuple)
+                # suche jenen Raum, dessen Raumnummer die 2. Raumnummer 
+                #der aktuellen türe ist(doortuple)
                 #nimm von diesem Raumdie  xbackdoor koordinate
                 if World.rooms[r].number==up_room_number:
                     door_pos_h=World.rooms[r].x_backdoor
@@ -403,7 +462,6 @@ def draw_room2(room):
             door_screen.refresh()
         
     return door_dict
-
 
 def draw_room(room):
     ''' drawing rooms and doors '''
@@ -454,7 +512,7 @@ def main(main_screen):
 
     ##instance some screens
     main_screen.refresh()
-    export_screen=curses.newwin(6,80,17,0)
+    export_screen=curses.newwin(5,80,18,0)
     export_screen.refresh()
     export_screen.idlok(1)    ###for scrolling
     export_screen.scrollok(1)
@@ -481,6 +539,8 @@ def main(main_screen):
         if key==ord('t'):
             h=Human()
             export_screen.addstr(h.export())
+        if key==ord('r'):
+            pass    ##TODO##
 
         if key==ord('s'):
             
@@ -492,6 +552,9 @@ def main(main_screen):
                 key=main_screen.getch()
                 if key==ord('q'):
                     break
+                if key==ord('i'):
+                    m=Menu()
+                    m.run(room.creature_list())
                 if key in door_dict.keys():
                     d=World.doors[door_dict[key]]
                     for i in d.door_tupel:
@@ -501,7 +564,9 @@ def main(main_screen):
                 main_screen.erase()
                 main_screen.refresh()                    
 
+        main_screen.erase()
         main_screen.refresh()
+        export_screen.erase()
         export_screen.refresh()
 
 if __name__=='__main__':
@@ -513,6 +578,7 @@ if __name__=='__main__':
         curses.start_color()
         curses.init_pair(1,curses.COLOR_BLACK,curses.COLOR_WHITE)
         curses.init_pair(2,curses.COLOR_YELLOW,curses.COLOR_BLUE)
+        curses.init_pair(3,curses.COLOR_GREEN,curses.COLOR_BLACK)
         ############
         main(mainscr)
         ############
