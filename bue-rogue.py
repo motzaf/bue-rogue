@@ -116,17 +116,7 @@ class Level(object):
         
         #self.bathroom_counter=random.randint(1,3)
         #self.corridor_counter=random.randint(3,6)
-    def get_roomtypelist(self):
-        """browses all subclasses of Room and returns
-        a list with the class names.
-        Assumes that first char of a classname is correctly uppercase."""
-        roomtypeslist = []
-        for classname in [thing for thing in dir() if thing[0].isupper() ]:
-            for basename in vars()[classname].__bases__:
-                 if ".Room" in str(b):  # the current class is based on Room class
-                     roomtypeslist.append(classname)
-        return roomtypeslist
-
+    
     def safe_lobby(self):
         '''safe and static to test other features'''
         Lobby(self.number)
@@ -134,7 +124,7 @@ class Level(object):
     def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
         """recursive function to generate an start room (can be the lobby)
            and some other rooms connected to this startroom"""
-        roomtypeslist = self.get_roomtypelist()
+        roomtypeslist = get_roomtypelist()
         if "Lobby" in roomtypeslist:
             roomtypeslist.remove("Lobby") # remove Lobby
             
@@ -223,20 +213,33 @@ class Room(object):
                 creature_name_list.append(World.creatures[c].name)
         return creature_name_list
 
-    def creature_list(self):
+    def creature_list(self): ####test ob kopie oder pointer
         creature_list=[]
         for c in World.creatures:
             if World.creatures[c].roomnumber==self.number:
                 creature_list.append(World.creatures[c])
         return creature_list
+
+    def item_list(self): ####test ob kopie oder pointer
+        item_list=[]
+        for i in World.items:
+            if World.items[i].roomnumber==self.number:
+                item_list.append(World.items[i])
+        return item_list
         
-
-
     def check_creatures(self):
         '''number of creatures in this room'''
         count=0
         for c in World.creatures:
             if World.creatures[c].roomnumber==self.number:
+                count+=1
+        return count
+
+    def check_items(self):
+        '''number of items in room returned'''
+        count=0
+        for i in World.items:
+            if World.items[i].roomnumber==self.number:
                 count+=1
         return count
 
@@ -256,6 +259,7 @@ class Room(object):
         text='\nRoomnumber: {} {}\n'.format(self.number,roomname)
         text+='Number of Doors: {} \n'.format(len(self.check_doors()))   
         text+='Number of Creatures: {} \n'.format(self.check_creatures())
+        text+='Number of Items: {}\n'.format(self.check_items())
         return text
 
 class Office(Room):
@@ -268,6 +272,8 @@ class Lobby(Room):
         World.levels[self.level].lobby_nr=self.number # set the level-wide lobby-nr
         for r in range(0,random.randint(10,20)):
             Human(self.number)
+        for r in range(0,random.randint(10,20)):
+            Item(self.number)
           
 class Corridor(Room):
     def __init__(self,level):
@@ -299,14 +305,13 @@ class Door(object):
         text+='connecting: {} with {} \n'.format(self.door_tupel[0],self.door_tupel[1])
         return text
 
-
 class Item(object):
     ###epic liste von eigenschaftsworten gewisse wschl. bez. eigenschaft
     adj=['org','ur','episch','leiwand','viech','voi','fett']
     nom=['bleistift','zeichenblock','kugelschreiber','bürogueklammer','tischlampe','blumentopf']
     number=0
 
-    def __init__(self,roomnumber=-1):
+    def __init__(self,roomnumber=0):
         self.roomnumber=roomnumber
         self.number=Item.number
         Item.number+=1
@@ -332,11 +337,17 @@ class Item(object):
         else:
             return name
 
+    def export(self):
+        return 'ItemetI'
+
 class Menu(object):
     def __init__(self):
         self.screen=curses.newwin(24,50,0,0)
         self.export=curses.newwin(20,30,0,30)
         self.screen.keypad(1)
+        self.screen.idlok(1)    ###for scrolling
+        self.screen.scrollok(1)
+
         self.up_keys=(259,ord('k'))
         self.down_keys=(258,ord('j'))
 
@@ -370,6 +381,18 @@ class Menu(object):
                 self.screen.erase()
                 break
 
+def get_roomtypelist():
+        """browses all subclasses of Room and returns
+        a list with the class names.
+        Assumes that first char of a classname is correctly uppercase."""
+        roomtypeslist = []
+        print('da muss er herkommen',vars().keys())
+        for classname in [thing for thing in dir() if thing[0].isupper() ]:
+            for basename in vars()[classname].__bases__:
+                print(classname,basename)
+                if ".Room" in str(b):  # the current class is based on Room class
+                    roomtypeslist.append(classname)
+        return roomtypeslist
 
 def main_menu():
     screen=curses.newwin(10,5,5,30)
@@ -509,7 +532,6 @@ def generate_menu_items(tmp_list):
 def main(main_screen):
     ###lets instance a world
     w=World()
-
     ##instance some screens
     main_screen.refresh()
     export_screen=curses.newwin(5,80,18,0)
@@ -552,9 +574,12 @@ def main(main_screen):
                 key=main_screen.getch()
                 if key==ord('q'):
                     break
-                if key==ord('i'):
+                if key==ord('c'):
                     m=Menu()
                     m.run(room.creature_list())
+                if key==ord('i'):
+                    m=Menu()
+                    m.run(room.item_list())
                 if key in door_dict.keys():
                     d=World.doors[door_dict[key]]
                     for i in d.door_tupel:
