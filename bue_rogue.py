@@ -76,7 +76,9 @@ class Human(Creature):
 
     def __init__(self,roomnumber=0):
         Creature.__init__(self,roomnumber=0)
-        self.name=self.create_name()        
+        self.name=self.create_name()
+        self.profession=''
+        self.boss=-1    #creature.number
 
     def create_name(self):
         if self.sex=='m':
@@ -315,6 +317,7 @@ class Cantina(Room):
 class Door(object):
     number=0
     compass={'n':'s','s':'n','e':'w','w':'e'}
+
     def __init__(self,level,room1nr,room2nr,room1_facing):
         self.facing=room1_facing  ###direction of door from room 1 (N,S,E,W)
         self.counter_facing=Door.compass[self.facing]
