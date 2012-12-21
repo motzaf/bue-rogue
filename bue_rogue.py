@@ -14,6 +14,7 @@ class World(object):
     doors={}
     items={}
     quests={}
+    tiles={}
     roomtypes = [] 
     #quantityWords={0.0:'not a all',0.2:'a litte',0.4:'somewhat',0.6:'quite',0.8:'much'}
     #approvalWords={-0.7:'hates',0.0:'ignores',0.7:'loves'}
@@ -192,7 +193,24 @@ class Level(object):
         text+='\n************+\n'
         return text
 
+class Tile(object):
+    '''each room has nine tiles
+    pos is a number from 0-7 clockwise 8 would be middle tile
+    room is a set of 3x3 tiles'''
+    number=0
+    def __init__(self,roomnumber,pos):
+        self.number=Tile.number
+        Tile.number+=1
+        self.roomnumber=roomnumber
+        self.pos=pos
+        World.tiles[self.number]=self
+        has_door=True
+
+        
+
+
 class Room(object):
+    '''room is a set of 3x3 tiles'''
     counter=0
     #roomtypes=['Corridor','Office','Cantina','Storage'] ###lobby fehlt absichtlich
     def __init__(self,level):
@@ -296,7 +314,10 @@ class Cantina(Room):
 
 class Door(object):
     number=0
-    def __init__(self,level,room1nr,room2nr):
+    compass={'n':'s','s':'n','e':'w','w':'e'}
+    def __init__(self,level,room1nr,room2nr,room1_facing):
+        self.facing=room1_facing  ###direction of door from room 1 (N,S,E,W)
+        self.counter_facing=Door.compass[self.facing]
         self.level=level
         self.number=Door.number
         Door.number+=1
@@ -306,8 +327,9 @@ class Door(object):
         self.door_tupel=(room1nr,room2nr)
 
     def export(self):
-        text='\nDoornumber: {} \n'.format(self.number)
+        text='Doornumber: {} \n'.format(self.number)
         text+='connecting: {} with {} \n'.format(self.door_tupel[0],self.door_tupel[1])
+        text+='heading {} (counter {})'.format(self.facing,self.counter_facing)
         return text
 
 class Item(object):
@@ -579,10 +601,10 @@ def main(main_screen):
                 key=main_screen.getch()
                 if key==ord('q'):
                     break
-                if key==ord('c'):
+                if key==ord('z'):
                     m=Menu()
                     m.run(room.creature_list())
-                if key==ord('i'):
+                if key==ord('x'):
                     m=Menu()
                     m.run(room.item_list())
                 if key in door_dict.keys():

@@ -26,7 +26,6 @@ class World(object):
 
     #Filelist
     filenames=['colornames.txt','firstnamesf.txt','firstnamesm.txt','lastnames.txt','traitnames.csv']
-
     
     def load_files(self,filenames=[]):
         ''' loads all files into dictionaries and lists '''
@@ -67,7 +66,6 @@ class Creature(object):
         self.flaw=[]
         self.trait=[]
         self.skills=[]
-
         
 class Human(Creature):
     ''' humanoid '''
@@ -91,6 +89,7 @@ class Human(Creature):
             text+='Male'
         else:
             text+='Female'
+        text+='\nIntelligence: {}'.format(self.intelligence)
         return text
 
 class Level(object):
@@ -338,7 +337,7 @@ class Item(object):
             return name
 
     def export(self):
-        return 'ItemetI'
+        return 'Item:'
 
 class Menu(object):
     def __init__(self):
@@ -398,21 +397,12 @@ def main_menu():
     screen=curses.newwin(10,5,5,30)
     screen.keypad(1)
     menu_items=[('play','s'),('test','t'),('reset','r'),('quit','q')]
-    #screen.addstr('asdf',curses.color_pair(1))
     counter=0
     for m in menu_items:
         screen.addstr(menu_items.index(m),0,m[0])
     screen.addstr(0,0,menu_items[0][0],curses.color_pair(2))
     while True:
         key=screen.getch()
-        #if key==258 and item < len(menu_items)-1:  ###key_down
-        #    item+=1
-        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
-        #    screen.addstr(item-1,0,menu_items[item-1])
-        #if key==259 and item > 0:  ###key_up
-        #    item-=1
-        #    screen.addstr(item,0,menu_items[item],curses.color_pair(2))
-        #    screen.addstr(item+1,0,menu_items[item+1])
 
         if key==258:
             pos_old=counter%len(menu_items)
@@ -436,10 +426,6 @@ def main_menu():
         if key==ord('q'):
             screen.erase()
             return ord('q')
-        
-    #m=Menu()
-    #for item in menu_items:
-    #return 's'
 
 def draw_room2(room):
     #room variables
