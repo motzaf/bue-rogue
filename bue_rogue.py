@@ -348,12 +348,15 @@ class Item(object):
     nom=['bleistift','zeichenblock','kugelschreiber','bürogueklammer','tischlampe','blumentopf']
     number=0
 
-    def __init__(self,roomnumber=0):
+    def __init__(self,roomnumber=0, owner=-1, carrier=-1, container=-1):
         self.roomnumber=roomnumber
         self.number=Item.number
         Item.number+=1
         World.items[self.number]=self
         self.name=self.name_generator()
+        self.owner = owner # number of the human who legally owns this item
+        self.carrier = carrier # number of creature who is now transporting the item ( if carrier!=owner then it is a thief )
+        self.container = container # number of container item (Box, bag, ...) where the actual item is inside
 
     def name_generator(self,name=''):
         if name=='':
@@ -374,8 +377,31 @@ class Item(object):
         else:
             return name
 
-    def export(self):
-        return 'ItemetI'
+    def export(self, verbose = False):
+        text = "Item Nr {}".format(self.number)
+        if not verbose:
+            return text
+        else:
+            # if neither in container nor carrier, print out room
+            if self.container == -1 and self.carrier == -1:
+                text +=" laying around in room {}".format(self.roomnumber)
+            if self.container > -1: # recursion over containers
+                container = self.container
+                while container > -1
+                    text += " hiding inside container item {}".format(container)
+                    carrier =  World.items[container].container
+            if self.carrier > -1: # carriers are not recursive. a carrier itself can not be carried
+                if self.carrier == self.owner:
+                   text += "\ncarried (and owned) by creature {}".format(carrier)
+                else:
+                   text += "\ncarried by creature {}".format(carrier)
+            if (self.owner > -1) and (self.owner != self.carrier):
+                text += "\nproperty of creature {}".format(owner)
+            elif self.owner == -1:
+                text +="\nproperty of nobody!"
+        return text
+               
+        
 
 class Menu(object):
     def __init__(self):
@@ -418,18 +444,6 @@ class Menu(object):
                 self.screen.erase()
                 break
 
-#def get_roomtypelist():
-#        """browses all subclasses of Room and returns
-#        a list with the class names.
-#        Assumes that first char of a classname is correctly uppercase."""
-#        roomtypeslist = []
-#        print('da muss er herkommen',vars().keys())
-#        for classname in [thing for thing in dir() if thing[0].isupper() ]:
-#            for basename in vars()[classname].__bases__:
-#                print(classname,basename)
-#                if ".Room" in str(b):  # the current class is based on Room class
-#                    roomtypeslist.append(classname)
-#        return roomtypeslist
 
 def main_menu():
     screen=curses.newwin(10,5,5,30)
