@@ -632,11 +632,9 @@ if __name__=='__main__':
     #print('da muss er herkommen',vars().keys())
     for classname in [thing for thing in dir() if thing[0].isupper() ]:
             for basename in vars()[classname].__bases__:
-                #print(classname,basename)
                 if ".Room" in str(basename):  # the current class is based on Room class
                     World.roomtypes.append(classname)
 
-    #print("I found those Roomtypes:", World.roomtypes)
     try:
         mainscr=curses.initscr()
         curses.noecho()
