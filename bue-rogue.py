@@ -358,8 +358,8 @@ class Menu(object):
         while True:
             pos=counter%len(menu_items)
             self.screen.addstr(pos,0,menu_items[pos].name,curses.color_pair(3))
+            self.screen.refresh()
             self.export.addstr(0,0,menu_items[pos].export())
-            #self.export.box()
             self.export.refresh()
             key=self.screen.getch()
             self.export.erase()
