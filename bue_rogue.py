@@ -112,11 +112,10 @@ class Level(object):
         self.maxrooms=4
         self.rooms=0
         World.levels[self.number]=self
-        #self.safe_lobby()  # motz save room
-        
-        self.generate_rooms(self.lobby_nr, 3,9)
+        self.safe_lobby()  # motz safe room
+
+        #self.generate_rooms(self.lobby_nr, 2,4)
         #self.generate_rooms2() # motz funktionsaufruf
-        
         
         #self.bathroom_counter=random.randint(1,3)
         #self.corridor_counter=random.randint(3,6)
@@ -125,7 +124,7 @@ class Level(object):
         '''safe and static to test other features'''
         Lobby(self.number)
  
-    def generate_rooms(self,startroomnumber,minRooms=3,maxRooms=9):
+    def generate_rooms(self,startroomnumber,minRooms=1,maxRooms=4):
         """recursive function to generate an start room (can be the lobby)
            and some other rooms connected to this startroom"""
         roomtypeslist = World.roomtypes[:]
@@ -168,8 +167,7 @@ class Level(object):
 
                 if rt=='Corridor':
                     if self.corridors < self.maxcorridors:        #avoid stack-overvlow
-                        self.generate_rooms(tmp_room.number)      # recursion
-        
+                        self.generate_rooms(tmp_room.number)      # recursion    
 
     def motz_generate_rooms2(self,connect_room_to=0):
         for i in range(3,7):
@@ -197,8 +195,15 @@ class Level(object):
 
 class Tile(object):
     '''each room has nine tiles
-    pos is a number from 0-7 clockwise 8 would be middle tile
+        -------
+        |0|1|2|
+        --+-+--
+        |3|4|5|
+        --+-+--
+        |6|7|8|
+        -------
     room is a set of 3x3 tiles'''
+
     number=0
     def __init__(self,roomnumber,pos):
         self.number=Tile.number
@@ -207,8 +212,6 @@ class Tile(object):
         self.pos=pos
         World.tiles[self.number]=self
         has_door=True
-
-        
 
 
 class Room(object):
@@ -230,6 +233,10 @@ class Room(object):
         #self.bathroom=False
         #self.corridor=False
         #self.doors=[]
+
+    def place_doors(self,level):
+        doorlist=check_doors(self)
+        
 
     def creature_name_list(self):
         creature_name_list=[]
